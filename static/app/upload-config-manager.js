@@ -84,7 +84,7 @@ function createConfigItemElement(config, index) {
     // 从布尔值 isUsed 转换为状态字符串用于显示
     const configStatus = config.isUsed ? 'used' : 'unused';
     const item = document.createElement('div');
-    item.className = `config-item-manager ${configStatus}`;
+    item.className = `config-item-manager config-card ${configStatus}`;
     item.dataset.index = index;
 
     const statusIcon = config.isUsed ? 'fa-check-circle' : 'fa-circle-question';
@@ -225,8 +225,8 @@ function createConfigItemElement(config, index) {
         </button>` : '';
 
     item.innerHTML = `
-        <div class="config-item-main-row">
-            <div class="config-item-left">
+        <div class="config-card__header">
+            <div class="config-card__identity">
                 <div class="config-item-icon-wrapper ${config.type || 'other'}">
                     <i class="fas ${typeIcon}"></i>
                 </div>
@@ -240,73 +240,72 @@ function createConfigItemElement(config, index) {
                     </div>
                 </div>
             </div>
-            
-            <div class="config-item-middle">
-                <div class="config-meta-info">
-                    <span class="meta-item" title="${t('upload.fileSize')}">
-                        <i class="fas fa-weight-hanging"></i> ${formatFileSize(config.size)}
-                    </span>
-                    <span class="meta-item" title="${t('upload.lastModified')}">
-                        <i class="fas fa-calendar-alt"></i> ${formatDate(config.modified)}
-                    </span>
-                </div>
-                ${expirationHtml}
+            <div class="config-status-indicator ${configStatus}">
+                <i class="fas ${statusIcon}"></i>
+                <span data-i18n="${config.isUsed ? 'upload.statusFilter.used' : 'upload.statusFilter.unused'}">${statusText}</span>
             </div>
+        </div>
 
-            <div class="config-item-right">
-                <div class="config-status-col">
-                    <div class="config-status-indicator ${configStatus}">
-                        <i class="fas ${statusIcon}"></i>
-                        <span data-i18n="${config.isUsed ? 'upload.statusFilter.used' : 'upload.statusFilter.unused'}">${statusText}</span>
-                    </div>
-                    ${linkedNodesInfo}
-                    ${quickLinkBtnHtml}
-                </div>
-                <div class="config-item-chevron">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
+        <div class="config-card__meta">
+            <span class="meta-item" title="${t('upload.fileSize')}">
+                <i class="fas fa-weight-hanging"></i> ${formatFileSize(config.size)}
+            </span>
+            <span class="meta-item" title="${t('upload.lastModified')}">
+                <i class="fas fa-calendar-alt"></i> ${formatDate(config.modified)}
+            </span>
+            ${expirationHtml}
+        </div>
+
+        ${linkedNodesInfo ? `<div class="config-card__nodes">${linkedNodesInfo}</div>` : ''}
+
+        <div class="config-card__footer">
+            <div class="config-card__footer-start">
+                ${quickLinkBtnHtml}
+                <button type="button" class="btn-icon-text btn-toggle-details" title="Chi tiết">
+                    <i class="fas fa-chevron-down"></i> <span>Chi tiết</span>
+                </button>
+            </div>
+            <div class="config-card__actions">
+                ${forceExpireBtnHtml ? forceExpireBtnHtml.replace('btn-small btn-force-expire', 'btn-icon btn-force-expire') : ''}
+                <button type="button" class="btn-icon btn-icon-view" data-path="${config.path}" title="${t('upload.action.view')}">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button type="button" class="btn-icon btn-icon-download" data-path="${config.path}" title="${t('upload.action.download')}">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button type="button" class="btn-icon btn-icon-danger btn-icon-delete" data-path="${config.path}" title="${t('upload.action.delete')}">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>
 
         <div class="config-item-details">
             <div class="config-details-grid">
                 <div class="config-detail-item path-item">
-                    <div class="config-detail-label" data-i18n="upload.detail.path">文件完整路径</div>
+                    <div class="config-detail-label" data-i18n="upload.detail.path">Đường dẫn đầy đủ</div>
                     <div class="config-detail-value">${config.path}</div>
                 </div>
                 <div class="config-detail-item">
-                    <div class="config-detail-label" data-i18n="upload.detail.size">文件大小</div>
+                    <div class="config-detail-label" data-i18n="upload.detail.size">Kích thước</div>
                     <div class="config-detail-value">${formatFileSize(config.size)}</div>
                 </div>
                 <div class="config-detail-item">
-                    <div class="config-detail-label" data-i18n="upload.detail.modified">最后修改时间</div>
+                    <div class="config-detail-label" data-i18n="upload.detail.modified">Sửa lần cuối</div>
                     <div class="config-detail-value">${formatDate(config.modified)}</div>
                 </div>
                 <div class="config-detail-item">
-                    <div class="config-detail-label" data-i18n="upload.detail.status">当前关联状态</div>
+                    <div class="config-detail-label" data-i18n="upload.detail.status">Trạng thái liên kết</div>
                     <div class="config-detail-value status-text-${configStatus}" data-i18n="${config.isUsed ? 'upload.statusFilter.used' : 'upload.statusFilter.unused'}">${statusText}</div>
                 </div>
             </div>
             ${usageInfoHtml}
-            <div class="config-item-actions">
-                ${forceExpireBtnHtml}
-                <button class="btn-small btn-view" data-path="${config.path}">
-                    <i class="fas fa-eye"></i> <span data-i18n="upload.action.view">${t('upload.action.view')}</span>
-                </button>
-                <button class="btn-small btn-download" data-path="${config.path}">
-                    <i class="fas fa-download"></i> <span data-i18n="upload.action.download">${t('upload.action.download')}</span>
-                </button>
-                <button class="btn-small btn-delete-small" data-path="${config.path}">
-                    <i class="fas fa-trash"></i> <span data-i18n="upload.action.delete">${t('upload.action.delete')}</span>
-                </button>
-            </div>
         </div>
     `;
 
     // 添加按钮事件监听器
-    const viewBtn = item.querySelector('.btn-view');
-    const downloadBtn = item.querySelector('.btn-download');
-    const deleteBtn = item.querySelector('.btn-delete-small');
+    const viewBtn = item.querySelector('.btn-icon-view');
+    const downloadBtn = item.querySelector('.btn-icon-download');
+    const deleteBtn = item.querySelector('.btn-icon-delete');
     const forceExpireBtn = item.querySelector('.btn-force-expire');
     
     if (viewBtn) {
@@ -346,12 +345,13 @@ function createConfigItemElement(config, index) {
         });
     }
 
-    // 添加点击事件展开/折叠详情
-    item.addEventListener('click', (e) => {
-        if (!e.target.closest('.config-item-actions') && !e.target.closest('.config-detail-value')) {
+    const toggleBtn = item.querySelector('.btn-toggle-details');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             item.classList.toggle('expanded');
-        }
-    });
+        });
+    }
 
     // 点击路径复制
     const pathValueEl = item.querySelector('.path-item .config-detail-value');
@@ -555,22 +555,13 @@ function updateStats() {
     const usedCount = filteredConfigs.filter(config => config.isUsed).length;
     const unusedCount = filteredConfigs.filter(config => !config.isUsed).length;
 
-    const totalEl = document.getElementById('configCount');
-    const usedEl = document.getElementById('usedConfigCount');
-    const unusedEl = document.getElementById('unusedConfigCount');
+    const totalEl = document.getElementById('configCountValue');
+    const usedEl = document.getElementById('usedConfigCountValue');
+    const unusedEl = document.getElementById('unusedConfigCountValue');
 
-    if (totalEl) {
-        totalEl.textContent = t('upload.count', { count: totalCount });
-        totalEl.setAttribute('data-i18n-params', JSON.stringify({ count: totalCount.toString() }));
-    }
-    if (usedEl) {
-        usedEl.textContent = t('upload.usedCount', { count: usedCount });
-        usedEl.setAttribute('data-i18n-params', JSON.stringify({ count: usedCount.toString() }));
-    }
-    if (unusedEl) {
-        unusedEl.textContent = t('upload.unusedCount', { count: unusedCount });
-        unusedEl.setAttribute('data-i18n-params', JSON.stringify({ count: unusedCount.toString() }));
-    }
+    if (totalEl) totalEl.textContent = totalCount;
+    if (usedEl) usedEl.textContent = usedCount;
+    if (unusedEl) unusedEl.textContent = unusedCount;
 }
 
 /**

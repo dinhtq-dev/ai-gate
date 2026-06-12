@@ -1,14 +1,16 @@
-/* 严格限制作用域的 Playground 布局 */
+/* Playground — XMITM glass workspace */
 .pg-workspace.active {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 120px);
-    background: var(--bg-primary);
-    border-radius: var(--radius-xl);
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(var(--blur-glass));
+    border-radius: var(--radius-2xl);
     border: 1px solid var(--border-color);
     overflow: hidden;
-    margin-top: -0.5rem;
+    margin-top: 0;
     animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* 顶部导航限制 */
@@ -32,19 +34,24 @@
 }
 
 .pg-workspace .pg-workspace-header h2 {
-    font-size: 1.15rem !important;
+    font-size: var(--text-lg) !important;
     font-weight: 700 !important;
     margin-bottom: 0 !important;
-    color: var(--text-primary);
+    background: var(--gradient-title);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.75rem;
     letter-spacing: -0.02em;
 }
 
 .pg-workspace .pg-workspace-header h2 i {
-    color: var(--primary-color);
-    filter: drop-shadow(0 0 4px var(--primary-20));
+    color: var(--title-accent);
+    -webkit-text-fill-color: initial;
+    filter: drop-shadow(0 0 6px rgba(var(--primary-rgb), 0.35));
 }
 
 .pg-workspace .pg-indicator {
@@ -61,10 +68,10 @@
 }
 
 .pg-workspace .pg-indicator.active { 
-    color: var(--primary-color); 
-    background: var(--primary-10);
-    border: 1px solid var(--primary-20);
-    box-shadow: 0 0 12px var(--primary-10);
+    color: var(--text-accent); 
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.1);
 }
 
 .pg-workspace .pg-indicator .dot { 
@@ -105,11 +112,10 @@
 }
 
 .pg-workspace .pg-btn-icon:hover {
-    background: var(--bg-secondary);
-    color: var(--primary-color);
-    border-color: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.08);
+    color: var(--text-accent);
+    border-color: rgba(var(--primary-rgb), 0.4);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
 }
 
 /* 主布局限制 */
@@ -119,18 +125,18 @@
     grid-template-columns: 280px 1fr 320px;
     grid-template-rows: 1fr;
     overflow: hidden;
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
 }
 
-/* 侧边栏 & 配置面板 */
 .pg-workspace .pg-side-nav, 
 .pg-workspace .pg-config-panel {
-    background: var(--bg-secondary);
-    padding: 1.75rem;
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(var(--blur-glass));
+    padding: 1.5rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 1.5rem;
     min-height: 0;
 }
 
@@ -175,27 +181,27 @@
 .pg-workspace .welcome-card {
     text-align: center;
     max-width: 440px;
-    padding: 3rem 2rem;
-    background: var(--bg-primary);
-    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(var(--blur-glass));
+    border-radius: var(--radius-2xl);
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pg-workspace .welcome-icon {
     width: 72px;
     height: 72px;
-    background: var(--primary-10);
-    color: var(--primary-color);
-    border-radius: 20px;
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--text-accent);
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1.75rem;
+    margin: 0 auto 1.5rem;
     font-size: 1.75rem;
-    transform: rotate(-5deg);
-    box-shadow: 0 8px 16px var(--primary-10);
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
 }
 
 /* 消息气泡 */
@@ -226,11 +232,15 @@
     box-shadow: var(--shadow-sm);
 }
 
-.pg-workspace .pg-message.user .pg-avatar { background: var(--primary-color); color: white; }
+.pg-workspace .pg-message.user .pg-avatar {
+    background: rgba(var(--primary-rgb), 0.9);
+    color: white;
+}
+
 .pg-workspace .pg-message.assistant .pg-avatar { 
     background: var(--bg-tertiary); 
-    color: var(--primary-color); 
-    border: 1px solid var(--border-color); 
+    color: var(--text-accent); 
+    border: 1px solid rgba(var(--primary-rgb), 0.25); 
 }
 
 .pg-workspace .pg-message-bubble {
@@ -244,18 +254,17 @@
 }
 
 .pg-workspace .pg-message.user .pg-message-bubble {
-    background: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.88);
     color: white;
     border-top-right-radius: 4px;
-    box-shadow: 0 4px 12px var(--primary-20);
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.25);
 }
 
 .pg-workspace .pg-message.assistant .pg-message-bubble {
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     border-top-left-radius: 4px;
-    box-shadow: var(--shadow-sm);
 }
 
 .pg-video-block {
@@ -345,9 +354,9 @@
 }
 
 .pg-workspace .pg-input-box:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 12px 24px -8px var(--primary-20), var(--shadow-xl);
-    transform: translateY(-2px);
+    border-color: rgba(var(--primary-rgb), 0.6);
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
+    transform: translateY(-1px);
 }
 
 .pg-workspace .pg-input-inner {
@@ -372,7 +381,7 @@
 }
 
 .pg-workspace .pg-send-pill {
-    background: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.9);
     color: white;
     width: 36px;
     height: 36px;
@@ -386,8 +395,14 @@
 }
 
 .pg-workspace .pg-send-pill:hover {
-    background: var(--primary-hover);
+    background: rgba(var(--primary-rgb), 1);
     transform: scale(1.05);
+}
+
+.pg-workspace .pg-send-pill:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .pg-workspace .pg-stop-pill {
@@ -442,46 +457,57 @@
 
 .pg-workspace .pg-input-field {
     width: 100%;
-    padding: 0.85rem;
-    border: 1.5px solid var(--border-color);
-    border-radius: 12px;
-    background: var(--bg-primary);
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
     appearance: none;
     transition: all 0.2s ease;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8a29e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
 }
 
+.pg-workspace .pg-input-field:focus {
+    outline: none;
+    border-color: rgba(var(--primary-rgb), 0.5);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
+}
+
 .pg-workspace .pg-system-textarea {
     width: 100%;
-    height: 240px;
-    padding: 1rem;
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    background: var(--bg-primary);
+    height: 220px;
+    padding: 0.875rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
     resize: vertical;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
     line-height: 1.6;
     color: var(--text-primary);
     transition: all 0.2s ease;
 }
 
+.pg-workspace .pg-system-textarea:focus {
+    outline: none;
+    border-color: rgba(var(--primary-rgb), 0.5);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
+}
+
 /* --- 超参数调优 (Hyperparameters) 专项美化 --- */
 .pg-workspace .pg-slider-group {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--bg-primary);
+    margin-bottom: 1.25rem;
+    padding: 0.875rem;
+    background: var(--bg-tertiary);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     transition: all 0.2s ease;
 }
 
 .pg-workspace .pg-slider-group:hover {
-    border-color: var(--primary-30);
-    box-shadow: var(--shadow-sm);
+    border-color: rgba(var(--primary-rgb), 0.3);
 }
 
 .pg-workspace .slider-info {
@@ -495,12 +521,12 @@
 }
 
 .pg-workspace .slider-info .val {
-    background: var(--primary-10);
-    color: var(--primary-color);
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--text-accent);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: var(--text-xs);
 }
 
 .pg-workspace .pg-num-input {
@@ -565,8 +591,8 @@
 }
 
 .pg-workspace .pg-switch input:checked + .pg-switch-slider {
-    background-color: var(--primary-color);
-    border-color: var(--primary-hover);
+    background-color: rgba(var(--primary-rgb), 0.85);
+    border-color: transparent;
 }
 
 .pg-workspace .pg-switch input:focus + .pg-switch-slider {
@@ -581,9 +607,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg-primary);
+    background: var(--bg-tertiary);
     padding: 0.75rem 1rem;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
 }
 
@@ -602,7 +628,7 @@
     -webkit-appearance: none;
     width: 18px;
     height: 18px;
-    background: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.9);
     border-radius: 50%;
     border: 3px solid var(--bg-primary);
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
@@ -611,7 +637,7 @@
 
 .pg-workspace input[type=range]::-webkit-slider-thumb:hover {
     transform: scale(1.15);
-    box-shadow: 0 0 0 6px var(--primary-10);
+    box-shadow: 0 0 0 6px rgba(var(--primary-rgb), 0.12);
 }
 
 /* 响应式 */
@@ -657,10 +683,9 @@
     }
     
     .pg-mobile-tabs .pg-tab-btn.active {
-        background: var(--primary-10);
-        color: var(--primary-color);
-        border-color: var(--primary-20);
-        box-shadow: 0 2px 8px var(--primary-10);
+        background: rgba(var(--primary-rgb), 0.12);
+        color: var(--text-accent);
+        border-color: rgba(var(--primary-rgb), 0.25);
     }
 
     .pg-workspace .pg-main-layout { 
@@ -703,15 +728,14 @@
         width: 100%;
         padding: 0.85rem;
         border: none;
-        border-radius: 12px;
-        background: var(--primary-color);
+        border-radius: var(--radius-lg);
+        background: rgba(var(--primary-rgb), 0.9);
         color: white;
-        font-size: 0.95rem;
+        font-size: var(--text-sm);
         font-weight: 700;
         cursor: pointer;
         transition: all 0.2s ease;
         margin-top: 1rem;
-        box-shadow: 0 4px 12px var(--primary-20);
     }
     
     .pg-workspace .pg-mobile-start-chat-btn:hover {

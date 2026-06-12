@@ -35,11 +35,171 @@
 .section h2 {
     font-size: var(--text-2xl);
     margin-bottom: 1.25rem;
-    color: var(--text-primary);
+    background: var(--gradient-title);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.header-title {
+    background: var(--gradient-title);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Panel & card titles — ấm, icon cam (XMITM) */
+.guide-panel-title h3,
+.tutorial-panel-title h3,
+.tutorial-panel h3,
+.system-info-panel h3,
+.dashboard-panel__title h3,
+.routing-examples-panel h3,
+.provider-status-panel h3,
+.upload-config-panel h3,
+.access-panel-title h3,
+.config-handoff-title h3,
+.providers-handoff-title h3,
+.logs-panel-title,
+.usage-panel > h3,
+.plugins-panel > h3,
+.config-panel > h3,
+.market-panel > h3,
+.logs-container > h3,
+.modal-header h3,
+.modal-header h2,
+.provider-modal-header h2 {
+    color: var(--title-text);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.guide-panel-title i,
+.tutorial-panel-title i,
+.tutorial-panel h3 i,
+.access-panel-title i,
+.system-info-panel h3 i,
+.dashboard-panel__title i,
+.routing-examples-panel h3 i,
+.provider-status-panel h3 i,
+.upload-config-panel h3 i,
+.plugins-panel > h3 i,
+.config-panel > h3 i,
+.config-handoff-title i,
+.providers-handoff-title i,
+.logs-panel-title i,
+.market-panel > h3 i {
+    color: var(--title-accent);
+    filter: drop-shadow(0 0 6px rgba(var(--primary-rgb), 0.35));
+}
+
+.stat-info h3 {
+    color: var(--title-text);
+}
+
+[data-theme="dark"] .guide-panel-title h3,
+[data-theme="dark"] .tutorial-panel h3,
+[data-theme="dark"] .system-info-panel h3,
+[data-theme="dark"] .routing-examples-panel h3,
+[data-theme="dark"] .config-panel > h3,
+[data-theme="dark"] .plugins-panel > h3 {
+    text-shadow: 0 1px 12px rgba(249, 115, 22, 0.08);
 }
 
 .stats-grid {
     gap: var(--card-gap);
+}
+
+/* ── Global text hierarchy (XMITM warm) ── */
+body {
+    color: var(--text-primary);
+}
+
+p,
+.guide-content,
+.help-text,
+.description,
+.panel-desc,
+.note-text,
+.config-description {
+    color: var(--text-secondary);
+}
+
+label,
+.form-label,
+.field-label {
+    color: var(--text-secondary);
+}
+
+small,
+.text-muted,
+.text-hint,
+.caption {
+    color: var(--text-muted);
+}
+
+h4, h5, h6,
+.card-title,
+.item-title,
+.step-content h4 {
+    color: var(--text-primary);
+}
+
+.step-content p,
+.step-content ul li,
+.branch-option ul li {
+    color: var(--text-secondary);
+}
+
+a:not(.btn):not(.nav-item):not(.tab-item):not(.skip-link) {
+    color: var(--text-link);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:not(.btn):not(.nav-item):not(.tab-item):not(.skip-link):hover {
+    color: var(--text-link-hover);
+}
+
+code:not(pre code),
+kbd,
+.inline-code {
+    color: var(--text-code);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+}
+
+.stat-info p,
+.stat-label,
+.metric-label {
+    color: var(--text-tertiary);
+}
+
+.status-badge {
+    color: var(--text-secondary);
+}
+
+.theme-toggle,
+.language-btn {
+    color: var(--text-secondary);
+}
+
+.highlight-note,
+.highlight-note p {
+    color: var(--text-secondary) !important;
+}
+
+.feature-card p,
+.faq-item p,
+.api-example p {
+    color: var(--text-secondary);
+}
+
+.feature-card h4,
+.faq-item h4 {
+    color: var(--text-primary);
 }
 
 /* ── Header — glass như XMITM ── */
@@ -60,13 +220,6 @@
     border-left: none;
     border-right: none;
     border-top: none;
-}
-
-.header-title {
-    background: var(--gradient-brand);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .status-badge {
@@ -104,13 +257,13 @@
 .nav-item:hover {
     background: rgba(var(--primary-rgb), 0.08);
     border-color: rgba(var(--primary-rgb), 0.14);
-    color: var(--primary-light);
+    color: var(--text-link-hover);
 }
 
 .nav-item.active {
     background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.16) 0%, rgba(var(--accent-rgb), 0.1) 100%);
     border-color: rgba(var(--primary-rgb), 0.3);
-    color: var(--primary-light);
+    color: var(--text-accent);
     font-weight: 600;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
@@ -180,6 +333,11 @@
     letter-spacing: -0.03em;
 }
 
+.stat-info .stat-value,
+.stat-info h3 .value {
+    color: var(--text-primary);
+}
+
 /* ── Highlight notes ── */
 .highlight-note {
     background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(var(--accent-rgb), 0.04) 100%) !important;
@@ -209,7 +367,7 @@
 
 .tab-item.active {
     background: transparent;
-    color: var(--text-primary) !important;
+    color: var(--title-text) !important;
     border-bottom-color: var(--primary-color);
     box-shadow: none;
     font-weight: 700;
@@ -217,7 +375,7 @@
 
 .tab-item:hover:not(.active) {
     background: transparent;
-    color: var(--text-primary);
+    color: var(--text-link-hover);
     border-bottom-color: rgba(var(--primary-rgb), 0.3);
 }
 
@@ -228,10 +386,16 @@
     border-color: var(--border-color);
 }
 
-[data-theme="dark"] .form-control {
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-control:focus {
     background: rgba(0, 0, 0, 0.4);
     border-color: rgba(255, 255, 255, 0.05);
-    color: #e2e8f0;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] select.form-control option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 .form-control:focus {
@@ -263,7 +427,7 @@
 
 .btn-secondary:hover {
     border-color: rgba(var(--primary-rgb), 0.3);
-    color: var(--primary-hover);
+    color: var(--text-link);
     background: rgba(var(--primary-rgb), 0.06);
 }
 
@@ -274,14 +438,14 @@
 
 [data-theme="dark"] .btn-secondary:hover {
     border-color: rgba(var(--primary-rgb), 0.3);
-    color: var(--primary-light);
+    color: var(--text-link-hover);
     background: rgba(var(--primary-rgb), 0.08);
 }
 
 .theme-toggle:hover,
 .language-btn:hover {
     border-color: rgba(var(--primary-rgb), 0.4);
-    color: var(--primary-light);
+    color: var(--text-link-hover);
 }
 
 /* ── Toast & modal ── */
@@ -289,6 +453,17 @@
     backdrop-filter: blur(12px);
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-header,
+.modal-footer,
+.provider-modal-header {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    color: var(--text-secondary);
 }
 
 .modal.show {
@@ -313,7 +488,7 @@
 
 .login-page .logo h1 {
     font-family: var(--font-display);
-    background: var(--gradient-brand);
+    background: var(--gradient-title);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

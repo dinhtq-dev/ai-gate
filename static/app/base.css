@@ -16,6 +16,10 @@
     --gradient-primary: linear-gradient(135deg, #f97316 0%, #d97706 100%);
     --gradient-primary-hover: linear-gradient(135deg, #ea580c 0%, #b45309 100%);
     --gradient-brand: linear-gradient(135deg, #fed7aa 0%, #fdba74 45%, #fde68a 100%);
+    --gradient-title: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #d97706 100%);
+    --title-accent: #ea580c;
+    --title-text: #1c1917;
+    --title-text-soft: #57534e;
     --body-bg-image:
         radial-gradient(120% 80% at 50% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 55%),
         radial-gradient(80% 60% at 100% 100%, rgba(217, 119, 6, 0.05) 0%, transparent 50%);
@@ -33,10 +37,17 @@
     --bg-glass: rgba(255, 251, 247, 0.88);
     --bg-glass-strong: rgba(255, 255, 255, 0.92);
     
-    /* 文本色 */
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #94a3b8;
+    /* 文本色 — warm stone (light) */
+    --text-primary: #1c1917;
+    --text-secondary: #57534e;
+    --text-tertiary: #78716c;
+    --text-muted: #a8a29e;
+    --text-link: #c2410c;
+    --text-link-hover: #ea580c;
+    --text-accent: #ea580c;
+    --text-on-primary: #ffffff;
+    --text-code: #9a3412;
+    --text-inverse: #fafaf9;
     
     /* 边框和分割线 */
     --border-color: rgba(249, 115, 22, 0.12);
@@ -134,7 +145,7 @@
     
     /* 主题切换按钮 */
     --theme-toggle-bg: var(--bg-tertiary);
-    --theme-toggle-icon: var(--text-secondary);
+    --theme-toggle-icon: var(--text-accent);
     
     /* 警告/高亮颜色 */
     --warning-bg: #fef3c7;
@@ -221,6 +232,10 @@
     --gradient-primary: linear-gradient(135deg, #f97316 0%, #d97706 100%);
     --gradient-primary-hover: linear-gradient(135deg, #ea580c 0%, #b45309 100%);
     --gradient-brand: linear-gradient(135deg, #fed7aa 0%, #fdba74 45%, #fde68a 100%);
+    --gradient-title: linear-gradient(135deg, #fed7aa 0%, #fdba74 45%, #fde68a 100%);
+    --title-accent: #fb923c;
+    --title-text: #fde8d4;
+    --title-text-soft: #d6d3d1;
     --body-bg-image: radial-gradient(120% 120% at 50% 10%, #2d140b 0%, #080504 60%, #000000 100%);
     
     --success-color: #22c55e;
@@ -234,9 +249,16 @@
     --bg-glass: rgba(20, 12, 10, 0.45);
     --bg-glass-strong: rgba(20, 12, 10, 0.6);
     
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-tertiary: #64748b;
+    --text-primary: #e7e5e4;
+    --text-secondary: #a8a29e;
+    --text-tertiary: #78716c;
+    --text-muted: #57534e;
+    --text-link: #fb923c;
+    --text-link-hover: #fdba74;
+    --text-accent: #fb923c;
+    --text-on-primary: #ffffff;
+    --text-code: #fdba74;
+    --text-inverse: #1c1917;
     
     --border-color: rgba(255, 255, 255, 0.04);
     --border-hover: rgba(249, 115, 22, 0.3);
@@ -444,7 +466,6 @@ h1, h2, h3, .header-title, .section h2 {
     font-size: var(--text-2xl);
     font-weight: 700;
     margin-bottom: 1.25rem;
-    color: var(--text-primary);
     letter-spacing: -0.025em;
     display: flex;
     align-items: center;

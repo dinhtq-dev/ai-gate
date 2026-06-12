@@ -2,159 +2,174 @@
 <!-- Dashboard Section -->
 <section id="dashboard" class="section active" aria-labelledby="dashboard-title">
     <h2 id="dashboard-title" data-i18n="dashboard.title">Tổng quan hệ thống</h2>
-    <div class="dashboard-top-row">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="uptime">--</h3>
-                    <p data-i18n="dashboard.uptime">Thời gian hoạt động</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- System Information Panel -->
-    <div class="system-info-panel">
-        <div class="system-info-header">
-            <h3 data-i18n="dashboard.systemInfo">Thông tin hệ thống</h3>
-            <div class="update-controls">
-                <div id="versionSelectWrapper" style="display: none; margin-right: 8px;">
-                    <select id="versionSelect" class="form-control select-sm" style="height: 32px; padding: 0 8px; font-size: 13px; min-width: 120px;">
-                        <!-- Versions will be loaded here -->
-                    </select>
-                </div>
-                <button id="checkUpdateBtn" class="btn btn-outline btn-sm" data-i18n-title="dashboard.update.checkTitle" title="Kiểm tra phiên bản mới">
-                    <i class="fas fa-sync-alt"></i> <span data-i18n="dashboard.update.check">Kiểm tra cập nhật</span>
-                </button>
-                <button id="performUpdateBtn" class="btn btn-primary btn-sm" style="display: none;" data-i18n-title="dashboard.update.performTitle" title="Cập nhật lên phiên bản mới nhất">
-                    <i class="fas fa-download"></i> <span data-i18n="dashboard.update.perform">Cập nhật ngay</span>
-                </button>
-            </div>
-        </div>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-tag"></i> <span data-i18n="dashboard.version">Phiên bản</span>
-                </span>
-                <div class="version-display-wrapper">
-                    <span class="info-value" id="appVersion">--</span>
-                    <span class="update-badge" id="updateBadge" style="display: none;">
-                        <i class="fas fa-arrow-up"></i> <span id="latestVersionText">--</span>
-                    </span>
+    <div class="dashboard-overview">
+        <!-- Hero stats -->
+        <div class="dashboard-stat-row">
+            <div class="dash-stat-chip dash-stat-chip--uptime">
+                <div class="dash-stat-chip__icon" aria-hidden="true"><i class="fas fa-clock"></i></div>
+                <div class="dash-stat-chip__body">
+                    <span class="dash-stat-chip__value" id="uptime">--</span>
+                    <span class="dash-stat-chip__label" data-i18n="dashboard.uptime">Thời gian hoạt động</span>
                 </div>
             </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-code"></i> <span data-i18n="dashboard.nodeVersion">Phiên bản Node.js</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="nodeVersion">--</span>
+            <div class="dash-stat-chip dash-stat-chip--providers">
+                <div class="dash-stat-chip__icon" aria-hidden="true"><i class="fas fa-plug"></i></div>
+                <div class="dash-stat-chip__body">
+                    <span class="dash-stat-chip__value" id="dashActiveProviders">0</span>
+                    <span class="dash-stat-chip__label" data-i18n="providers.activeProviders">Nhà cung cấp đang hoạt động</span>
                 </div>
             </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-clock"></i> <span data-i18n="dashboard.serverTime">Giờ máy chủ</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="serverTime">--</span>
+            <div class="dash-stat-chip dash-stat-chip--healthy">
+                <div class="dash-stat-chip__icon" aria-hidden="true"><i class="fas fa-heartbeat"></i></div>
+                <div class="dash-stat-chip__body">
+                    <span class="dash-stat-chip__value" id="dashHealthyProviders">0</span>
+                    <span class="dash-stat-chip__label" data-i18n="providers.healthyProviders">Nhà cung cấp khỏe mạnh</span>
                 </div>
             </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-desktop"></i> <span data-i18n="dashboard.platform">Nền tảng</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="platformInfo">--</span>
-                </div>
-            </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-memory"></i> <span data-i18n="dashboard.memoryUsage">Sử dụng bộ nhớ</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="memoryUsage">--</span>
-                </div>
-            </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-microchip"></i> <span data-i18n="dashboard.cpuUsage">Sử dụng CPU</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="cpuUsage">--</span>
-                </div>
-            </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-cogs"></i> <span data-i18n="dashboard.serviceMode">Chế độ dịch vụ</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="serviceMode">--</span>
-                </div>
-            </div>
-            <div class="info-item">
-                <span class="info-label">
-                    <i class="fas fa-microchip"></i> <span data-i18n="dashboard.processPid">PID tiến trình</span>
-                </span>
-                <div class="version-display-wrapper">
-                <span class="info-value" id="processPid">--</span>
+            <div class="dash-stat-chip dash-stat-chip--connections">
+                <div class="dash-stat-chip__icon" aria-hidden="true"><i class="fas fa-bolt"></i></div>
+                <div class="dash-stat-chip__body">
+                    <span class="dash-stat-chip__value" id="dashActiveConnections">0</span>
+                    <span class="dash-stat-chip__label" data-i18n="providers.activeConnections">Kết nối đang hoạt động</span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Provider Nodes Status Panel -->
-    <div class="provider-status-panel">
-        <div class="system-info-header">
-            <h3><i class="fas fa-network-wired"></i> <span data-i18n="dashboard.providerStatus">Trạng thái node nhà cung cấp</span></h3>
-            <button id="refreshProviderStatusBtn" class="btn btn-outline btn-sm" data-i18n-title="common.refresh" title="Làm mới">
-                <i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Làm mới</span>
-            </button>
-        </div>
-        <div id="providerStatusGrid" class="provider-status-grid">
-            <!-- Provider status cards will be loaded here -->
-            <div class="status-loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <span data-i18n="common.loading">Đang tải...</span>
+        <!-- System Information -->
+        <div class="dashboard-panel dashboard-panel--system system-info-panel">
+            <div class="dashboard-panel__header system-info-header">
+                <div class="dashboard-panel__title">
+                    <i class="fas fa-server" aria-hidden="true"></i>
+                    <h3 data-i18n="dashboard.systemInfo">Thông tin hệ thống</h3>
+                </div>
+                <div class="update-controls">
+                    <div id="versionSelectWrapper" class="version-select-wrap" hidden>
+                        <select id="versionSelect" class="form-control select-sm version-select">
+                            <!-- Versions will be loaded here -->
+                        </select>
+                    </div>
+                    <button id="checkUpdateBtn" class="btn btn-secondary btn-toolbar" type="button" data-i18n-title="dashboard.update.checkTitle" title="Kiểm tra phiên bản mới">
+                        <i class="fas fa-sync-alt"></i> <span data-i18n="dashboard.update.check">Kiểm tra cập nhật</span>
+                    </button>
+                    <button id="performUpdateBtn" class="btn btn-primary btn-toolbar" type="button" hidden data-i18n-title="dashboard.update.performTitle" title="Cập nhật lên phiên bản mới nhất">
+                        <i class="fas fa-download"></i> <span data-i18n="dashboard.update.perform">Cập nhật ngay</span>
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Advanced Information (Collapsible) -->
-    <details class="dashboard-details">
-        <summary class="dashboard-summary">
-            <div class="summary-content">
-                <i class="fas fa-cube"></i>
-                <span data-i18n="dashboard.advancedInfo">Danh sách model khả dụng</span>
-                <span class="expand-hint" data-i18n="dashboard.expandMore">Mở rộng thêm</span>
-            </div>
-            <i class="fas fa-chevron-down caret-icon"></i>
-        </summary>
-
-        <div class="routing-examples-panel" style="margin-top: 1rem; border-top: none;">
-            <!-- 可用模型列表 -->
-            <div class="models-section" style="margin-top: 0;">
-                <div class="models-description">
-                    <div class="highlight-note">
-                        <i class="fas fa-info-circle"></i>
-                        <span data-i18n="models.note">Nhấp tên model để sao chép vào clipboard</span>
+            <div class="dashboard-metrics">
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-tag"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.version">Phiên bản</span>
+                        <div class="dashboard-metric__value-row">
+                            <span class="dashboard-metric__value" id="appVersion">--</span>
+                            <span class="update-badge" id="updateBadge" hidden>
+                                <i class="fas fa-arrow-up"></i> <span id="latestVersionText">--</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Models Container -->
-                <div class="models-container">
-                    <div id="modelsList" class="models-list">
-                        <!-- Models will be loaded here -->
-                        <div class="models-loading">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <span data-i18n="common.loading">Đang tải...</span>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-code"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.nodeVersion">Phiên bản Node.js</span>
+                        <span class="dashboard-metric__value" id="nodeVersion">--</span>
+                    </div>
+                </div>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-clock"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.serverTime">Giờ máy chủ</span>
+                        <span class="dashboard-metric__value dashboard-metric__value--mono" id="serverTime">--</span>
+                    </div>
+                </div>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-desktop"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.platform">Nền tảng</span>
+                        <span class="dashboard-metric__value" id="platformInfo">--</span>
+                    </div>
+                </div>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-memory"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.memoryUsage">Sử dụng bộ nhớ</span>
+                        <span class="dashboard-metric__value dashboard-metric__value--mono" id="memoryUsage">--</span>
+                    </div>
+                </div>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-microchip"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.cpuUsage">Sử dụng CPU</span>
+                        <span class="dashboard-metric__value dashboard-metric__value--mono" id="cpuUsage">--</span>
+                    </div>
+                </div>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-cogs"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.serviceMode">Chế độ dịch vụ</span>
+                        <span class="dashboard-metric__value" id="serviceMode">--</span>
+                    </div>
+                </div>
+                <div class="dashboard-metric">
+                    <div class="dashboard-metric__icon" aria-hidden="true"><i class="fas fa-fingerprint"></i></div>
+                    <div class="dashboard-metric__content">
+                        <span class="dashboard-metric__label" data-i18n="dashboard.processPid">PID tiến trình</span>
+                        <span class="dashboard-metric__value dashboard-metric__value--mono" id="processPid">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Provider Nodes Status -->
+        <div class="dashboard-panel dashboard-panel--providers provider-status-panel">
+            <div class="dashboard-panel__header system-info-header">
+                <div class="dashboard-panel__title">
+                    <i class="fas fa-network-wired" aria-hidden="true"></i>
+                    <h3 data-i18n="dashboard.providerStatus">Trạng thái node nhà cung cấp</h3>
+                </div>
+                <button id="refreshProviderStatusBtn" class="btn btn-secondary btn-toolbar" type="button" data-i18n-title="common.refresh" title="Làm mới">
+                    <i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Làm mới</span>
+                </button>
+            </div>
+            <div id="providerStatusGrid" class="provider-status-grid">
+                <div class="status-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span data-i18n="common.loading">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Models (Collapsible) -->
+        <details class="dashboard-panel dashboard-details">
+            <summary class="dashboard-summary">
+                <div class="summary-content">
+                    <i class="fas fa-cube" aria-hidden="true"></i>
+                    <span data-i18n="dashboard.advancedInfo">Danh sách model khả dụng</span>
+                    <span class="expand-hint" data-i18n="dashboard.expandMore">Mở rộng thêm</span>
+                </div>
+                <i class="fas fa-chevron-down caret-icon" aria-hidden="true"></i>
+            </summary>
+
+            <div class="dashboard-details__body">
+                <div class="models-section">
+                    <div class="models-description">
+                        <div class="highlight-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="models.note">Nhấp tên model để sao chép vào clipboard</span>
+                        </div>
+                    </div>
+                    <div class="models-container">
+                        <div id="modelsList" class="models-list">
+                            <div class="models-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span data-i18n="common.loading">Đang tải...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </details>
-    
+        </details>
+    </div>
 </section>

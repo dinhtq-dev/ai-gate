@@ -621,20 +621,27 @@ function renderProviderStatusOverview(providers, configMap, sortedProviderTypes)
         const totalCount = accounts.length;
         const disabledCount = accounts.filter(acc => acc.isDisabled).length;
         const unhealthyCount = totalCount - healthyCount - disabledCount;
+        const healthPct = totalCount > 0 ? Math.round((healthyCount / totalCount) * 100) : 0;
+        const barClass = healthPct >= 80 ? '' : healthPct >= 50 ? ' provider-health-bar__fill--warn' : ' provider-health-bar__fill--bad';
 
         const totalUsage = accounts.reduce((sum, acc) => sum + (acc.usageCount || 0), 0);
         const totalErrors = accounts.reduce((sum, acc) => sum + (acc.errorCount || 0), 0);
+        const successRate = totalUsage > 0 ? ((totalUsage - totalErrors) / totalUsage * 100).toFixed(1) + '%' : '--';
 
         card.innerHTML = `
-            <div class="provider-info">
+            <div class="provider-card-head">
                 <span class="provider-name" title="${displayName}">${displayName}</span>
-                <span class="provider-count" style="font-size: 0.75rem; color: var(--text-secondary);">${healthyCount}/${totalCount}</span>
+                <span class="provider-ratio">${healthyCount}/${totalCount}</span>
             </div>
-            
-            <div class="provider-nodes-summary">
-                <span style="color: #10b981;"><i class="fas fa-check"></i> ${healthyCount}</span>
-                <span style="color: #ef4444; ${unhealthyCount === 0 ? 'opacity: 0.3;' : ''}"><i class="fas fa-times"></i> ${unhealthyCount}</span>
-                <span style="color: #9ca3af; ${disabledCount === 0 ? 'opacity: 0.3;' : ''}"><i class="fas fa-minus-circle"></i> ${disabledCount}</span>
+
+            <div class="provider-health-bar" title="${healthPct}%">
+                <div class="provider-health-bar__fill${barClass}" style="width: ${healthPct}%"></div>
+            </div>
+
+            <div class="provider-status-pills">
+                <span class="status-pill status-pill--ok${healthyCount === 0 ? ' is-empty' : ''}"><i class="fas fa-check"></i> ${healthyCount}</span>
+                <span class="status-pill status-pill--bad${unhealthyCount === 0 ? ' is-empty' : ''}"><i class="fas fa-times"></i> ${unhealthyCount}</span>
+                <span class="status-pill status-pill--muted${disabledCount === 0 ? ' is-empty' : ''}"><i class="fas fa-minus-circle"></i> ${disabledCount}</span>
             </div>
 
             <div class="node-dots">
@@ -650,17 +657,14 @@ function renderProviderStatusOverview(providers, configMap, sortedProviderTypes)
                     } else {
                         statusTitle += ` (${t('modal.provider.status.healthy')})`;
                     }
-                    // 增加提示信息：用量和错误
                     statusTitle += `\n${t('providers.stat.usageCount')}: ${acc.usageCount || 0}\n${t('providers.stat.errorCount')}: ${acc.errorCount || 0}`;
-                    
-                    // 为圆点创建 HTML 字符串，添加点击跳转事件
                     return `<span class="node-dot ${statusClass}" title="${statusTitle}" onclick="window.jumpToProviderNode('${type}', '${acc.uuid}', event)"></span>`;
                 }).join('')}
             </div>
             <div class="provider-stats-summary">
-                <span><i class="fas fa-paper-plane" style="font-size: 0.7rem; opacity: 0.7;"></i> ${totalUsage}</span>
-                <span><i class="fas fa-exclamation-circle" style="font-size: 0.7rem; opacity: 0.7;"></i> ${totalErrors}</span>
-                <span class="success-rate">${totalUsage > 0 ? ((totalUsage - totalErrors) / totalUsage * 100).toFixed(1) + '%' : '--'}</span>
+                <span><i class="fas fa-paper-plane"></i> ${totalUsage}</span>
+                <span><i class="fas fa-exclamation-circle"></i> ${totalErrors}</span>
+                <span class="success-rate">${successRate}</span>
             </div>
         `;
         grid.appendChild(card);
@@ -716,10 +720,16 @@ function updateProviderStatsDisplay(activeProviders, healthyProviders, totalAcco
     const activeProvidersEl = document.getElementById('activeProviders');
     const healthyProvidersEl = document.getElementById('healthyProviders');
     const activeConnectionsEl = document.getElementById('activeConnections');
+    const dashActiveProvidersEl = document.getElementById('dashActiveProviders');
+    const dashHealthyProvidersEl = document.getElementById('dashHealthyProviders');
+    const dashActiveConnectionsEl = document.getElementById('dashActiveConnections');
     
     if (activeProvidersEl) activeProvidersEl.textContent = activeProvidersByUsage;
     if (healthyProvidersEl) healthyProvidersEl.textContent = healthyProviders;
     if (activeConnectionsEl) activeConnectionsEl.textContent = activeConnections;
+    if (dashActiveProvidersEl) dashActiveProvidersEl.textContent = activeProvidersByUsage;
+    if (dashHealthyProvidersEl) dashHealthyProvidersEl.textContent = healthyProviders;
+    if (dashActiveConnectionsEl) dashActiveConnectionsEl.textContent = activeConnections;
     
     // 打印调试信息到控制台
     console.log('Provider Stats Updated:', {

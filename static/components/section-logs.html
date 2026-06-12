@@ -1,19 +1,41 @@
 <link rel="stylesheet" href="components/section-logs.css">
 <!-- Logs Section -->
 <section id="logs" class="section" aria-labelledby="logs-title">
-    <h2 id="logs-title" data-i18n="logs.title">Nhật ký thời gian thực</h2>
-    <div class="logs-controls">
-        <button class="btn btn-danger" id="clearLogs" aria-label="Clear All Logs" data-i18n-aria-label="logs.clear">
-            <i class="fas fa-trash" aria-hidden="true"></i> <span data-i18n="logs.clear">Xóa nhật ký</span>
-        </button>
-        <button class="btn btn-secondary" id="downloadLogs" aria-label="Download Today Logs" data-i18n-aria-label="logs.download">
-            <i class="fas fa-download" aria-hidden="true"></i> <span data-i18n="logs.download">Tải nhật ký</span>
-        </button>
-        <button class="btn btn-primary" id="toggleAutoScroll" data-enabled="true" aria-label="Toggle Auto-scroll" data-i18n-aria-label="logs.autoScroll">
-            <i class="fas fa-arrow-down" aria-hidden="true"></i> <span data-i18n="logs.autoScroll.on">Tự cuộn: Bật</span>
-        </button>
-    </div>
-    <div class="logs-container" id="logsContainer" role="log" aria-live="polite" aria-atomic="false">
-        <!-- Logs will appear here -->
+    <div class="logs-overview">
+        <div class="logs-page-header">
+            <h2 id="logs-title" data-i18n="logs.title">Nhật ký thời gian thực</h2>
+        </div>
+
+        <div class="logs-panel">
+            <div class="logs-panel-header">
+                <div class="logs-panel-title">
+                    <i class="fas fa-terminal" aria-hidden="true"></i>
+                    <span data-i18n="logs.title">Nhật ký thời gian thực</span>
+                    <span class="logs-live-badge">
+                        <span class="logs-live-dot" aria-hidden="true"></span>
+                        LIVE
+                    </span>
+                </div>
+                <div class="logs-controls">
+                    <button class="btn btn-secondary btn-toolbar" id="toggleAutoScroll" data-enabled="true" aria-label="Toggle Auto-scroll" data-i18n-aria-label="logs.autoScroll">
+                        <i class="fas fa-arrow-down" aria-hidden="true"></i>
+                        <span data-i18n="logs.autoScroll.on">Tự cuộn: Bật</span>
+                    </button>
+                    <button class="btn btn-secondary btn-toolbar" id="downloadLogs" aria-label="Download Today Logs" data-i18n-aria-label="logs.download">
+                        <i class="fas fa-download" aria-hidden="true"></i>
+                        <span data-i18n="logs.download">Tải nhật ký</span>
+                    </button>
+                    <button class="btn btn-danger-outline btn-toolbar" id="clearLogs" aria-label="Clear All Logs" data-i18n-aria-label="logs.clear">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                        <span data-i18n="logs.clear">Xóa nhật ký</span>
+                    </button>
+                </div>
+            </div>
+            <div class="logs-terminal">
+                <div class="logs-container" id="logsContainer" role="log" aria-live="polite" aria-atomic="false">
+                    <!-- Logs will appear here -->
+                </div>
+            </div>
+        </div>
     </div>
 </section>

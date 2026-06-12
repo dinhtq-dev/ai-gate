@@ -2,18 +2,23 @@
 <!-- Configuration Section -->
 <section id="config" class="section" aria-labelledby="config-title">
     <h2 id="config-title" data-i18n="config.title">Quản lý cấu hình</h2>
+
+    <div class="config-overview">
     <div class="config-handoff-panel">
         <div class="config-handoff-head">
-            <div>
-                <h3 data-i18n="config.handoff.title">Bàn giao bên ngoài</h3>
+            <div class="config-handoff-head__text">
+                <div class="config-handoff-title">
+                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    <h3 data-i18n="config.handoff.title">Bàn giao bên ngoài</h3>
+                </div>
                 <p class="config-handoff-subtitle" data-i18n="config.handoff.subtitle">Hoàn tất API Key công khai và nhà cung cấp tải sẵn tại đây, rồi chuyển sang Truy cập nhanh để sao chép đoạn cấu hình cho client.</p>
             </div>
             <div class="config-handoff-actions">
-                <button type="button" class="btn btn-outline" id="configOpenQuickAccess">
+                <button type="button" class="btn btn-secondary btn-toolbar" id="configOpenQuickAccess">
                     <i class="fas fa-external-link-alt"></i>
                     <span data-i18n="config.handoff.openAccess">Mở Truy cập nhanh</span>
                 </button>
-                <button type="button" class="btn btn-primary" id="configSaveAndAccess">
+                <button type="button" class="btn btn-primary btn-toolbar" id="configSaveAndAccess">
                     <i class="fas fa-paper-plane"></i>
                     <span data-i18n="config.handoff.saveAndAccess">Lưu & Mở Truy cập nhanh</span>
                 </button>
@@ -478,5 +483,6 @@
                 </button>
             </div>
         </div>
+    </div>
     </div>
 </section>

@@ -87,7 +87,6 @@ async function initializeComponents() {
         { path: `${basePath}section-providers.html`, container: '#content-container', position: 'beforeend' },
         { path: `${basePath}section-usage.html`, container: '#content-container', position: 'beforeend' },
         { path: `${basePath}section-logs.html`, container: '#content-container', position: 'beforeend' },
-        { path: `${basePath}section-plugins.html`, container: '#content-container', position: 'beforeend' },
     ];
 
     try {
@@ -110,7 +109,6 @@ async function initializeComponents() {
             { path: `${basePath}section-usage.html`, container: '#content-container', position: 'beforeend' },
             { path: `${basePath}section-playground.html`, container: '#content-container', position: 'beforeend' },
             { path: `${basePath}section-logs.html`, container: '#content-container', position: 'beforeend' },
-            { path: `${basePath}section-plugins.html`, container: '#content-container', position: 'beforeend' },
         ];
         
         await loadComponents(sectionComponents);
