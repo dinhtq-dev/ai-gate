@@ -25,19 +25,17 @@
             justify-content: center;
             padding: 20px;
             background-color: var(--bg-secondary);
-            background-image:
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(var(--primary-rgb), 0.1) 0%, transparent 60%);
-            background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), 100% 100%;
+            background-image: var(--body-bg-image);
             background-attachment: fixed;
         }
 
         .login-container {
             background: var(--bg-glass-strong);
-            border-radius: var(--radius-xl);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-2xl);
             box-shadow: var(--shadow-glass);
-            border: 1px solid rgba(var(--primary-rgb), 0.15);
+            border: 1px solid var(--border-color);
             width: 100%;
             max-width: 400px;
             padding: 40px;
@@ -133,7 +131,7 @@
         .login-button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            background: var(--gradient-primary);
             color: white;
             border: none;
             border-radius: var(--radius-lg);

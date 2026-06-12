@@ -3061,7 +3061,7 @@ function showKiroAwsImportModal() {
                         <i class="fas fa-info-circle"></i>
                         <span data-i18n="oauth.kiro.awsImportInstructions">${t('oauth.kiro.awsImportInstructions')}</span>
                     </p>
-                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #c2410c;">
+                    <p style="margin: 8px 0 0 0; font-size: 12px; color: var(--primary-hover);">
                         <i class="fas fa-folder-open"></i>
                         <code style="background: #fed7aa; padding: 2px 6px; border-radius: 4px;">C:\\Users\\{username}\\.aws\\sso\\cache</code>
                     </p>
