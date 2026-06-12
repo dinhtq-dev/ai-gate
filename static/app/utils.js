@@ -16,74 +16,87 @@ function getBaseProviderConfigs() {
         { 
             id: 'forward-api', 
             name: 'NewAPI', 
-            icon: 'fa-share-square'
+            icon: 'fa-share-square',
+            theme: '#6366f1'
         },
         { 
             id: 'gemini-cli-oauth', 
             name: t('dashboard.routing.nodeName.gemini'), 
             icon: 'fa-robot',
+            theme: '#4285f4',
             defaultPath: 'configs/gemini/'
         },
         { 
             id: 'gemini-antigravity', 
             name: t('dashboard.routing.nodeName.antigravity'), 
             icon: 'fa-rocket',
+            theme: '#8b5cf6',
             defaultPath: 'configs/antigravity/'
         },
         { 
             id: 'claude-kiro-oauth', 
             name: t('dashboard.routing.nodeName.kiro'), 
             icon: 'fa-key',
+            theme: '#d97706',
             defaultPath: 'configs/kiro/'
         },
         { 
             id: 'openai-codex-oauth', 
             name: t('dashboard.routing.nodeName.codex'), 
             icon: 'fa-code',
+            theme: '#10a37f',
             defaultPath: 'configs/codex/'
         },
         {
             id: 'grok-cli-oauth',
             name: t('dashboard.routing.nodeName.grokCli'),
             icon: 'fa-terminal',
+            theme: '#374151',
             defaultPath: 'configs/grok-cli/'
         },
         { 
             id: 'openai-qwen-oauth', 
             name: t('dashboard.routing.nodeName.qwen'), 
             icon: 'fa-cloud',
+            theme: '#5946e1',
             defaultPath: 'configs/qwen/'
         },
         { 
             id: 'openai-iflow', 
             name: t('dashboard.routing.nodeName.iflow'), 
             icon: 'fa-stream',
+            theme: '#0ea5e9',
             defaultPath: 'configs/iflow/'
         },
         { 
             id: 'grok-web', 
             name: t('dashboard.routing.nodeName.grok'), 
-            icon: 'fa-user-secret'
+            icon: 'fa-user-secret',
+            theme: '#111827'
         },
         { 
             id: 'openai-custom', 
             name: t('dashboard.routing.nodeName.openai'), 
-            icon: 'fa-microchip'
+            icon: 'fa-microchip',
+            theme: '#059669'
         },
         { 
             id: 'claude-custom', 
             name: t('dashboard.routing.nodeName.claude'), 
-            icon: 'fa-brain'
+            icon: 'fa-brain',
+            theme: '#b45309'
         },
         { 
             id: 'openaiResponses-custom', 
             name: 'OpenAI Responses', 
-            icon: 'fa-reply-all'
+            icon: 'fa-reply-all',
+            theme: '#047857'
         },
         { 
             id: 'atlascloud', 
             name: 'AtlasCloud', 
-            icon: 'fa-cloud'
+            icon: 'fa-cloud',
+            theme: '#2563eb'
         },
     ];
 }
@@ -129,6 +142,7 @@ function getProviderConfigs(supportedProviders = []) {
                 id: providerId,
                 name: providerId,
                 icon: 'fa-server',
+                theme: '#64748b',
                 visible: true
             });
             usedIds.add(providerId);
@@ -136,6 +150,64 @@ function getProviderConfigs(supportedProviders = []) {
     });
 
     return result;
+}
+
+function resolveProviderConfig(providerType, configMap = {}) {
+    if (configMap[providerType]) {
+        return configMap[providerType];
+    }
+
+    const baseConfigs = getBaseProviderConfigs();
+    const exact = baseConfigs.find(config => config.id === providerType);
+    if (exact) return exact;
+
+    const prefixMatch = baseConfigs.find(config => providerType.startsWith(`${config.id}-`));
+    if (prefixMatch) {
+        const suffix = providerType.substring(prefixMatch.id.length + 1);
+        return {
+            ...prefixMatch,
+            id: providerType,
+            name: `${prefixMatch.name} (${suffix})`
+        };
+    }
+
+    return {
+        id: providerType,
+        name: providerType,
+        icon: 'fa-server',
+        theme: '#64748b'
+    };
+}
+
+function getProviderIconClass(configOrType, configMap = {}) {
+    const config = typeof configOrType === 'string'
+        ? resolveProviderConfig(configOrType, configMap)
+        : configOrType;
+    const icon = config?.icon || 'fa-server';
+    return icon.startsWith('fa-') ? `fas ${icon}` : icon;
+}
+
+function getProviderThemeColor(configOrType, configMap = {}) {
+    const config = typeof configOrType === 'string'
+        ? resolveProviderConfig(configOrType, configMap)
+        : configOrType;
+    return config?.theme || '#64748b';
+}
+
+function getAccountInitial(label) {
+    if (!label) return '?';
+    const clean = String(label).trim();
+    if (!clean) return '?';
+    if (clean.includes('@')) return clean[0].toUpperCase();
+    return clean[0].toUpperCase();
+}
+
+function buildProviderIconChip(providerType, configMap = {}, size = 'md') {
+    const config = resolveProviderConfig(providerType, configMap);
+    const iconClass = getProviderIconClass(config);
+    const theme = getProviderThemeColor(config);
+    const sizeClass = size === 'sm' ? 'provider-icon-chip--sm' : '';
+    return `<span class="provider-icon-chip ${sizeClass}" style="--provider-theme: ${theme}" title="${escapeHtml(config.name || providerType)}"><i class="${iconClass}" aria-hidden="true"></i></span>`;
 }
 
 /**
@@ -654,6 +726,11 @@ export {
     getProviderTypeFields,
     getProviderConfigs,
     getBaseProviderConfigs,
+    resolveProviderConfig,
+    getProviderIconClass,
+    getProviderThemeColor,
+    getAccountInitial,
+    buildProviderIconChip,
     getProviderStats,
     apiRequest,
     copyToClipboard,

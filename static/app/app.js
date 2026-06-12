@@ -79,7 +79,6 @@ import {
 
 import {
     initUsageManager,
-    loadUsagePageData,
     refreshUsage
 } from './usage-manager.js';
 
@@ -99,6 +98,11 @@ import {
     initPlaygroundManager,
     loadPlaygroundData
 } from './playground-manager.js';
+
+import {
+    initMitmManager,
+    loadMitmStatus
+} from './mitm-manager.js';
 
 let isAppInitialized = false;
 
@@ -137,10 +141,10 @@ async function initApp() {
         access: loadAccessInfo,
         config: loadConfiguration,
         providers: loadProvidersPageData,
+        dns: loadMitmStatus,
         'custom-models': () => window.customModelsManager?.load(),
         'upload-config': loadConfigList,
-        usage: loadUsagePageData,
-        playground: loadPlaygroundData
+        playground: loadPlaygroundData,
     });
     
     // 导出全局函数供其他模块使用
@@ -180,6 +184,7 @@ async function initApp() {
     initImageZoom(); // 初始化图片放大功能
     initTutorialManager(); // 初始化教程管理功能
     initPlaygroundManager(); // 初始化 Playground
+    initMitmManager(); // MITM + DNS (clone XMITM)
     initMobileMenu(); // 初始化移动端菜单
     
     // 加载初始数据 (确保在导航初始化前加载，因为导航可能触发页面数据加载)

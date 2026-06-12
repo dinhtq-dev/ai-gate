@@ -57,6 +57,25 @@
     gap: 0.5rem;
 }
 
+.supported-providers-tags .provider-tag {
+    --provider-theme: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--provider-theme) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--provider-theme) 28%, transparent);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.supported-providers-tags .provider-tag i {
+    color: var(--provider-theme);
+}
+
 .loading-inline {
     display: inline-flex;
     align-items: center;
@@ -199,8 +218,10 @@
 
 /* 实例卡片 */
 .usage-instance-card {
+    --provider-theme: #64748b;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
+    border-left: 3px solid color-mix(in srgb, var(--provider-theme) 50%, transparent);
     border-radius: 0.5rem;
     overflow: hidden;
     transition: var(--transition);
@@ -233,10 +254,43 @@
     align-items: center;
     gap: 0.375rem;
     font-size: 0.7rem;
-    color: var(--primary-color);
+    color: var(--provider-theme, var(--primary-color));
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+.instance-provider-type i {
+    color: var(--provider-theme, var(--primary-color));
+}
+
+.instance-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.usage-account-avatar {
+    --provider-theme: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--provider-theme) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--provider-theme) 35%, transparent);
+    color: var(--provider-theme);
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.usage-account-avatar--lg {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
 }
 
 .instance-name-text {

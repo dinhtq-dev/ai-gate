@@ -162,7 +162,26 @@
 .providers-toolbar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.providers-usage-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.providers-usage-toolbar .usage-last-update {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+.providers-usage-banner {
+    margin-top: -0.25rem;
 }
 
 .providers-search {
@@ -247,19 +266,88 @@
 }
 
 #providers .provider-item {
+    --provider-theme: #64748b;
     border: 1px solid var(--border-color);
+    border-left: 3px solid color-mix(in srgb, var(--provider-theme) 55%, transparent);
     border-radius: var(--radius-lg);
-    padding: 1.125rem 1.25rem;
+    padding: 0;
     transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     background: var(--bg-tertiary);
-    cursor: pointer;
+    cursor: default;
+    overflow: hidden;
+}
+
+#providers .provider-item-main {
+    padding: 1.125rem 1.25rem;
+    transition: background 0.2s ease;
+}
+
+#providers .provider-item-main:hover {
+    background: rgba(var(--primary-rgb), 0.04);
+}
+
+#providers .provider-usage-panel {
+    border-top: 1px solid var(--border-color);
+    padding: 0.875rem 1.25rem 1.125rem;
+    background: rgba(var(--primary-rgb), 0.03);
+}
+
+#providers .provider-usage-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+#providers .provider-usage-panel__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+#providers .provider-usage-panel__title i {
+    color: var(--title-accent);
+}
+
+#providers .provider-usage-content .usage-empty-inline {
+    padding: 0.75rem 0;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+#providers .provider-usage-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.625rem;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+#providers .provider-usage-summary .success-count.all-success {
+    color: var(--success-color, #22c55e);
+}
+
+#providers .provider-usage-summary .btn-toggle-provider-cards {
+    margin-left: auto;
+}
+
+#providers .provider-usage-content .usage-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.625rem;
 }
 
 #providers .provider-item:hover {
     border-color: rgba(var(--primary-rgb), 0.4);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
-    background: var(--bg-tertiary);
 }
 
 #providers .provider-header {
@@ -269,6 +357,81 @@
     gap: 1rem;
     flex-wrap: wrap;
     margin-bottom: 0.875rem;
+}
+
+#providers .provider-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+#providers .provider-name-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+#providers .provider-type-id {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.provider-icon-chip {
+    --provider-theme: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--provider-theme) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--provider-theme) 35%, transparent);
+    color: var(--provider-theme);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+.provider-icon-chip i {
+    font-size: 1rem;
+}
+
+.provider-icon-chip--sm {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-md);
+}
+
+.provider-icon-chip--sm i {
+    font-size: 0.8rem;
+}
+
+#providers .provider-usage-panel__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#providers .provider-card-head .provider-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+#providers .provider-card-head .provider-name > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#providers .provider-usage-content .usage-instance-card {
+    border-left-width: 3px;
 }
 
 #providers .provider-type-text {

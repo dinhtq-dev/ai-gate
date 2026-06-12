@@ -15,7 +15,7 @@ import {
     importAwsCredentials,
     batchImportGrokTokensStream
 } from '../auth/oauth-handlers.js';
-import { normalizeCodexExternalCredentials } from '../auth/codex-import-normalizer.js';
+import { normalizeCodexExternalCredentials, normalizeCodexExternalCredentialsAuto, detectCodexImportSource } from '../auth/codex-import-normalizer.js';
 
 const CODEX_EXTERNAL_IMPORT_BODY_LIMIT_BYTES = 5 * 1024 * 1024;
 const CODEX_EXTERNAL_IMPORT_MAX_ITEMS = 1000;
@@ -378,7 +378,11 @@ export async function handleBatchImportGeminiTokens(req, res) {
 export async function handleBatchImportCodexTokens(req, res) {
     try {
         const body = await getRequestBody(req);
-        const { tokens, skipDuplicateCheck } = body;
+        let { tokens, payload, skipDuplicateCheck } = body;
+
+        if ((!tokens || !Array.isArray(tokens) || tokens.length === 0) && payload !== undefined && payload !== null) {
+            tokens = Array.isArray(payload) ? payload : [payload];
+        }
 
         if (!tokens || !Array.isArray(tokens) || tokens.length === 0) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -526,16 +530,20 @@ export async function handleImportCodexExternalCredentials(req, res) {
         const body = await getRequestBody(req, { maxBytes: CODEX_EXTERNAL_IMPORT_BODY_LIMIT_BYTES });
         const { source, payload, skipDuplicateCheck } = body;
 
-        if (!['cpa', 'sub2api'].includes(source) || payload === undefined) {
+        if (payload === undefined || payload === null) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 success: false,
-                error: 'source must be cpa or sub2api, and payload is required'
+                error: 'payload is required'
             }));
             return true;
         }
 
-        const tokens = normalizeCodexExternalCredentials(source, payload);
+        const resolvedSource = ['cpa', 'sub2api', 'chatgpt-session'].includes(source)
+            ? source
+            : detectCodexImportSource(payload);
+
+        const tokens = normalizeCodexExternalCredentials(resolvedSource, payload);
         if (!Array.isArray(tokens) || tokens.length === 0) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
@@ -554,7 +562,7 @@ export async function handleImportCodexExternalCredentials(req, res) {
             return true;
         }
 
-        logger.info(`[Codex External Import] Starting ${source} import with ${tokens.length} item(s)...`);
+        logger.info(`[Codex External Import] Starting ${resolvedSource} import with ${tokens.length} item(s)...`);
 
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
@@ -569,7 +577,7 @@ export async function handleImportCodexExternalCredentials(req, res) {
         };
 
         sendSSE('start', {
-            source,
+            source: resolvedSource,
             total: tokens.length,
             accessTokenOnlyCount: tokens.filter(token => token.access_token_only).length
         });
@@ -579,17 +587,17 @@ export async function handleImportCodexExternalCredentials(req, res) {
             (progress) => {
                 sendSSE('progress', {
                     ...progress,
-                    source
+                    source: resolvedSource
                 });
             },
             !!skipDuplicateCheck
         );
 
-        logger.info(`[Codex External Import] Completed ${source}: ${result.success} success, ${result.failed} failed`);
+        logger.info(`[Codex External Import] Completed ${resolvedSource}: ${result.success} success, ${result.failed} failed`);
 
         sendSSE('complete', {
             success: true,
-            source,
+            source: resolvedSource,
             total: result.total,
             successCount: result.success,
             failedCount: result.failed,

@@ -9,6 +9,7 @@ import { broadcastEvent } from '../services/ui-manager.js';
 import { autoLinkProviderConfigs } from '../services/service-manager.js';
 import { CONFIG } from '../core/config-manager.js';
 import { getProxyConfigForProvider } from '../utils/proxy-utils.js';
+import { preprocessCodexImportPayload } from './codex-import-normalizer.js';
 
 /**
  * Codex OAuth 配置
@@ -688,7 +689,7 @@ export async function batchImportCodexTokensStream(tokens, onProgress = null, sk
     };
 
     for (let i = 0; i < tokens.length; i++) {
-        const tokenData = tokens[i];
+        let tokenData = tokens[i];
         const progressData = {
             index: i + 1,
             total: tokens.length,
@@ -699,6 +700,8 @@ export async function batchImportCodexTokensStream(tokens, onProgress = null, sk
             if (!tokenData || typeof tokenData !== 'object') {
                 throw new Error('Token 数据必须是 JSON 对象');
             }
+
+            tokenData = preprocessCodexImportPayload(tokenData);
 
             if (tokenData.skipped || tokenData.error) {
                 throw new Error(tokenData.reason || tokenData.error || 'skipped');

@@ -16,6 +16,7 @@ import * as updateApi from '../ui-modules/update-api.js';
 import * as oauthApi from '../ui-modules/oauth-api.js';
 import * as customModelsApi from '../ui-modules/custom-models-api.js';
 import * as accessApi from '../ui-modules/access-api.js';
+import * as mitmApi from '../ui-modules/mitm-api.js';
 import * as eventBroadcast from '../ui-modules/event-broadcast.js';
 import { HELP_DATA, API_GUIDE_DATA, API_EXAMPLES, formatHelpText, formatApiGuideText } from '../utils/docs-data.js';
 
@@ -485,6 +486,20 @@ export async function handleUIApiRequests(method, pathParam, req, res, currentCo
         if (method === 'DELETE') {
             return await customModelsApi.handleDeleteCustomModel(req, res, currentConfig, modelId);
         }
+    }
+
+    // MITM proxy control (clone from XMITM)
+    if (method === 'GET' && pathParam === '/api/mitm/status') {
+        return await mitmApi.handleGetMitmStatus(req, res, currentConfig);
+    }
+    if (method === 'POST' && pathParam === '/api/mitm/start') {
+        return await mitmApi.handleMitmStart(req, res, currentConfig);
+    }
+    if (method === 'POST' && pathParam === '/api/mitm/stop') {
+        return await mitmApi.handleMitmStop(req, res);
+    }
+    if (method === 'POST' && pathParam === '/api/mitm/dns/toggle') {
+        return await mitmApi.handleDnsToggle(req, res);
     }
 
     return false;

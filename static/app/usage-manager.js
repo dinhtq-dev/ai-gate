@@ -1,11 +1,13 @@
 // 用量管理模块
 
-import { showToast, bindOnce } from './utils.js';
+import { showToast, bindOnce, escapeHtml, resolveProviderConfig, getProviderIconClass, getProviderThemeColor, getAccountInitial } from './utils.js';
 import { getAuthHeaders } from './auth.js';
 import { t, getCurrentLanguage } from './i18n.js';
 
 // 提供商配置缓存
 let currentProviderConfigs = null;
+let supportedUsageProviders = [];
+let lastUsageData = null;
 let usagePageDataPromise = null;
 
 /**
@@ -22,6 +24,17 @@ export function updateUsageProviderConfigs(configs) {
 export function initUsageManager() {
     const refreshBtn = document.getElementById('refreshUsageBtn');
     bindOnce(refreshBtn, 'click', refreshUsage, 'refreshUsage');
+
+    const providersList = document.getElementById('providersList');
+    if (providersList) {
+        bindOnce(providersList, 'click', (e) => {
+            const btn = e.target.closest('.btn-refresh-provider-usage');
+            if (!btn) return;
+            e.stopPropagation();
+            const providerType = btn.getAttribute('data-provider');
+            if (providerType) refreshProviderUsage(providerType);
+        }, 'providerUsageRefreshDelegate');
+    }
 }
 
 /**
@@ -32,14 +45,22 @@ export function loadUsagePageData() {
         return usagePageDataPromise;
     }
 
-    usagePageDataPromise = Promise.all([
-        loadUsage(),
-        loadSupportedProviders()
-    ]).finally(() => {
-        usagePageDataPromise = null;
-    });
+    usagePageDataPromise = loadSupportedProviders()
+        .then(() => loadUsage())
+        .finally(() => {
+            usagePageDataPromise = null;
+        });
 
     return usagePageDataPromise;
+}
+
+/**
+ * 提供商列表重绘后恢复已缓存的用量展示
+ */
+export function reapplyUsageDisplay() {
+    if (!lastUsageData) return;
+    renderUsageData(lastUsageData);
+    applySupportedProviderVisibility();
 }
 
 /**
@@ -57,7 +78,8 @@ async function loadSupportedProviders() {
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const providers = await response.json();
-        
+        supportedUsageProviders = providers;
+
         listEl.innerHTML = '';
         const displayOrder = currentProviderConfigs ? currentProviderConfigs.map(c => c.id) : providers;
 
@@ -70,15 +92,33 @@ async function loadSupportedProviders() {
 
             const tag = document.createElement('span');
             tag.className = 'provider-tag';
-            tag.textContent = getProviderDisplayName(providerId);
+            const theme = getProviderThemeColor(resolveProviderConfig(providerId, getProviderConfigMap()));
+            tag.style.setProperty('--provider-theme', theme);
+            tag.innerHTML = `<i class="${getProviderIconClass(providerId, getProviderConfigMap())}" aria-hidden="true"></i> ${getProviderDisplayName(providerId)}`;
             tag.title = t('usage.doubleClickToRefresh');
             tag.addEventListener('dblclick', () => refreshProviderUsage(providerId));
             listEl.appendChild(tag);
         });
+
+        applySupportedProviderVisibility();
     } catch (error) {
         console.error('获取支持的提供商列表失败:', error);
         listEl.innerHTML = `<span class="error-text">${t('usage.failedToLoad')}</span>`;
     }
+}
+
+function applySupportedProviderVisibility() {
+    document.querySelectorAll('.provider-usage-panel').forEach(panel => {
+        const content = panel.querySelector('.provider-usage-content');
+        const providerType = content?.getAttribute('data-provider');
+        if (!providerType) return;
+        const supported = supportedUsageProviders.includes(providerType);
+        panel.hidden = !supported;
+    });
+}
+
+function getProviderUsageContainer(providerType) {
+    return document.querySelector(`.provider-usage-content[data-provider="${providerType}"]`);
 }
 
 /**
@@ -87,25 +127,25 @@ async function loadSupportedProviders() {
 export async function loadUsage() {
     const loadingEl = document.getElementById('usageLoading');
     const errorEl = document.getElementById('usageError');
-    const contentEl = document.getElementById('usageContent');
 
-    if (loadingEl) loadingEl.style.display = 'block';
-    if (errorEl) errorEl.style.display = 'none';
+    if (loadingEl) loadingEl.hidden = false;
+    if (errorEl) errorEl.hidden = true;
 
     try {
         const response = await fetch('/api/usage', { method: 'GET', headers: getAuthHeaders() });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        
-        if (loadingEl) loadingEl.style.display = 'none';
-        renderUsageData(data, contentEl);
+
+        if (loadingEl) loadingEl.hidden = true;
+        renderUsageData(data);
         updateTimeInfo(data);
     } catch (error) {
         console.error('获取用量数据失败:', error);
-        if (loadingEl) loadingEl.style.display = 'none';
+        if (loadingEl) loadingEl.hidden = true;
         if (errorEl) {
-            errorEl.style.display = 'block';
-            document.getElementById('usageErrorMessage').textContent = error.message;
+            errorEl.hidden = false;
+            const msgEl = document.getElementById('usageErrorMessage');
+            if (msgEl) msgEl.textContent = error.message;
         }
     }
 }
@@ -118,22 +158,17 @@ export async function refreshUsage() {
     if (refreshBtn) refreshBtn.disabled = true;
 
     try {
-        // 使用更明显的反馈：显示加载中的 Toast
         showToast(t('usage.loading'), 'info');
-        
+
         const response = await fetch('/api/usage?refresh=true', { method: 'GET', headers: getAuthHeaders() });
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.error?.message || `HTTP ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
-        // 渲染数据
-        renderUsageData(data, document.getElementById('usageContent'));
+        renderUsageData(data);
         updateTimeInfo(data);
-        
-        // 成功提示
         showToast(t('common.refresh.success'), 'success');
     } catch (error) {
         console.error('刷新用量失败:', error);
@@ -149,19 +184,18 @@ export async function refreshUsage() {
 export async function refreshSingleInstanceUsage(providerType, uuid, displayName) {
     try {
         showToast(t('usage.refreshingInstance', { name: displayName }), 'info');
-        const response = await fetch(`/api/usage/${providerType}/${uuid}?refresh=true`, { 
-            method: 'GET', 
-            headers: getAuthHeaders() 
+        const response = await fetch(`/api/usage/${providerType}/${uuid}?refresh=true`, {
+            method: 'GET',
+            headers: getAuthHeaders()
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.error?.message || `HTTP ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
-        // 局部更新该实例的卡片
+
         if (data && data.uuid) {
             updateSingleInstanceCard(providerType, data);
             showToast(t('common.refresh.success'), 'success');
@@ -178,20 +212,15 @@ export async function refreshSingleInstanceUsage(providerType, uuid, displayName
  * 更新单个实例卡片 (局部更新 DOM)
  */
 function updateSingleInstanceCard(providerType, instanceData) {
-    const container = document.getElementById('usageContent');
+    const container = getProviderUsageContainer(providerType);
     if (!container) return;
 
-    const group = container.querySelector(`.usage-provider-group[data-provider="${providerType}"]`);
-    if (!group) return;
-
-    const grid = group.querySelector('.usage-cards-grid');
+    const grid = container.querySelector('.usage-cards-grid');
     if (!grid) return;
 
-    // 找到该实例的卡片。卡片本身没有 data-uuid 属性，我们需要通过内部的 span 查找或添加它
-    // 在 createInstanceUsageCard 中，我们可以为卡片添加 data-uuid
     const cards = grid.querySelectorAll('.usage-instance-card');
     let targetCard = null;
-    
+
     for (const card of cards) {
         if (card.getAttribute('data-uuid') === instanceData.uuid) {
             targetCard = card;
@@ -219,15 +248,14 @@ export async function refreshProviderUsage(providerType) {
             throw new Error(errorData.error?.message || `HTTP ${response.status}`);
         }
         const data = await response.json();
-        
-        // 如果返回了全量数据或该提供商的数据，尝试局部更新
+
         if (data.providers && data.providers[providerType]) {
-            updateSingleProviderGroup(providerType, data.providers[providerType]);
+            updateProviderUsageInline(providerType, data.providers[providerType]);
             updateTimeInfo(data);
         } else {
             await loadUsage();
         }
-        
+
         showToast(t('common.refresh.success'), 'success');
     } catch (error) {
         console.error('刷新提供商用量失败:', error);
@@ -236,35 +264,14 @@ export async function refreshProviderUsage(providerType) {
 }
 
 /**
- * 更新单个提供商分组 (局部更新 DOM)
+ * 更新单个提供商的 inline 用量区域
  */
-function updateSingleProviderGroup(providerType, providerData) {
-    const container = document.getElementById('usageContent');
+function updateProviderUsageInline(providerType, providerData) {
+    const container = getProviderUsageContainer(providerType);
     if (!container) return;
 
-    const existingGroup = container.querySelector(`.usage-provider-group[data-provider="${providerType}"]`);
     const instances = (providerData.instances || []).filter(i => !i.isDisabled && !i.error?.includes('not initialized'));
-    
-    if (instances.length === 0) {
-        if (existingGroup) existingGroup.remove();
-        if (container.children.length === 0) {
-            renderUsageData({ providers: {} }, container);
-        }
-        return;
-    }
-
-    const newGroup = createProviderGroup(providerType, instances);
-    if (existingGroup) {
-        // 保留展开/折叠状态
-        if (!existingGroup.classList.contains('collapsed')) {
-            newGroup.classList.remove('collapsed');
-        }
-        container.replaceChild(newGroup, existingGroup);
-    } else {
-        // 如果原本没有，则按顺序插入或直接追加
-        container.appendChild(newGroup);
-        // 这里简化处理，实际可能需要根据 displayOrder 重新排序
-    }
+    renderProviderUsageInline(container, providerType, instances);
 }
 
 /**
@@ -275,84 +282,79 @@ function updateTimeInfo(data) {
         const el = document.getElementById('serverTimeValue');
         if (el) el.textContent = new Date(data.serverTime).toLocaleString(getCurrentLanguage());
     }
-    
+
     const lastUpdateEl = document.getElementById('usageLastUpdate');
     if (lastUpdateEl) {
         const timeStr = new Date(data.timestamp || Date.now()).toLocaleString(getCurrentLanguage());
         const key = data.fromCache ? 'usage.lastUpdateCache' : 'usage.lastUpdate';
         lastUpdateEl.textContent = t(key, { time: timeStr });
-        // 恢复国际化属性以便动态切换语言
         lastUpdateEl.setAttribute('data-i18n', key);
         lastUpdateEl.setAttribute('data-i18n-params', JSON.stringify({ time: timeStr }));
     }
 }
 
 /**
- * 渲染数据
+ * 渲染数据到各 provider item 的 inline 容器
  */
-function renderUsageData(data, container) {
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (!data?.providers || Object.keys(data.providers).length === 0) {
-        container.innerHTML = `<div class="usage-empty"><p>${t('usage.noData')}</p></div>`;
-        return;
-    }
+function renderUsageData(data) {
+    lastUsageData = data;
+    const containers = document.querySelectorAll('.provider-usage-content[data-provider]');
+    if (!containers.length) return;
 
     const groupedInstances = {};
-    for (const [type, pData] of Object.entries(data.providers)) {
-        if (currentProviderConfigs?.find(c => c.id === type)?.visible === false) continue;
-        const valid = (pData.instances || []).filter(i => !i.isDisabled && !i.error?.includes('not initialized'));
-        if (valid.length > 0) groupedInstances[type] = valid;
+    if (data?.providers) {
+        for (const [type, pData] of Object.entries(data.providers)) {
+            if (currentProviderConfigs?.find(c => c.id === type)?.visible === false) continue;
+            const valid = (pData.instances || []).filter(i => !i.isDisabled && !i.error?.includes('not initialized'));
+            if (valid.length > 0) groupedInstances[type] = valid;
+        }
     }
 
-    const displayOrder = currentProviderConfigs ? currentProviderConfigs.map(c => c.id) : Object.keys(groupedInstances);
-    displayOrder.forEach(type => {
-        if (groupedInstances[type]) container.appendChild(createProviderGroup(type, groupedInstances[type]));
+    containers.forEach(container => {
+        const providerType = container.getAttribute('data-provider');
+        if (!providerType) return;
+        if (supportedUsageProviders.length && !supportedUsageProviders.includes(providerType)) return;
+        renderProviderUsageInline(container, providerType, groupedInstances[providerType] || []);
     });
 }
 
 /**
- * 创建分组
+ * 在单个 provider item 内渲染用量卡片
  */
-function createProviderGroup(providerType, instances) {
-    const group = document.createElement('div');
-    group.className = 'usage-provider-group collapsed';
-    group.setAttribute('data-provider', providerType);
-    
+function renderProviderUsageInline(container, providerType, instances) {
+    container.innerHTML = '';
+
+    if (!instances.length) {
+        container.innerHTML = `<div class="usage-empty-inline"><p>${t('usage.noData')}</p></div>`;
+        return;
+    }
+
     const successCount = instances.filter(i => i.success).length;
-    group.innerHTML = `
-        <div class="usage-group-header">
-            <div class="usage-group-title">
-                <i class="fas fa-chevron-right toggle-icon"></i>
-                <i class="${getProviderIcon(providerType)} provider-icon"></i>
-                <span class="provider-name">${getProviderDisplayName(providerType)}</span>
-                <span class="instance-count">${t('usage.group.instances', { count: instances.length })}</span>
-                <span class="success-count ${successCount === instances.length ? 'all-success' : ''}">${t('usage.group.success', { count: successCount, total: instances.length })}</span>
-            </div>
-            <div class="usage-group-actions">
-                <button class="btn-toggle-cards"><i class="fas fa-expand-alt"></i></button>
-            </div>
-        </div>
-        <div class="usage-group-content"><div class="usage-cards-grid"></div></div>
+    const summary = document.createElement('div');
+    summary.className = 'provider-usage-summary';
+    summary.innerHTML = `
+        <span class="instance-count">${t('usage.group.instances', { count: instances.length })}</span>
+        <span class="success-count ${successCount === instances.length ? 'all-success' : ''}">${t('usage.group.success', { count: successCount, total: instances.length })}</span>
+        <button type="button" class="btn btn-secondary btn-sm btn-toggle-provider-cards" title="${t('usage.group.expandAll')}">
+            <i class="fas fa-expand-alt"></i>
+        </button>
     `;
-    
-    group.querySelector('.usage-group-title').onclick = () => group.classList.toggle('collapsed');
-    
-    const toggleBtn = group.querySelector('.btn-toggle-cards');
-    toggleBtn.onclick = (e) => {
+
+    const toggleBtn = summary.querySelector('.btn-toggle-provider-cards');
+    toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const cards = group.querySelectorAll('.usage-instance-card');
+        const cards = container.querySelectorAll('.usage-instance-card');
         const allCollapsed = Array.from(cards).every(card => card.classList.contains('collapsed'));
         cards.forEach(card => card.classList.toggle('collapsed', !allCollapsed));
-        const icon = toggleBtn.querySelector('i');
-        icon.className = allCollapsed ? 'fas fa-compress-alt' : 'fas fa-expand-alt';
-    };
-    
-    const grid = group.querySelector('.usage-cards-grid');
+        toggleBtn.querySelector('i').className = allCollapsed ? 'fas fa-compress-alt' : 'fas fa-expand-alt';
+    });
+
+    const grid = document.createElement('div');
+    grid.className = 'usage-cards-grid';
     instances.forEach(inst => grid.appendChild(createInstanceUsageCard(inst, providerType)));
 
-    return group;
+    container.appendChild(summary);
+    container.appendChild(grid);
 }
 
 /**
@@ -367,24 +369,30 @@ function createInstanceUsageCard(instance, providerType) {
     const summary = usage.summary || { usedPercent: 0, status: 'normal' };
     const user = usage.user || {};
     const displayName = user.email || instance.name || instance.uuid;
-
-    // 使用后端返回的 planClass，如果缺失则兜底
     const planClass = summary.planClass || 'plan-default';
+    const providerConfig = resolveProviderConfig(providerType, getProviderConfigMap());
+    const providerTheme = getProviderThemeColor(providerConfig);
+    const providerIcon = getProviderIconClass(providerConfig);
+    const providerName = getProviderDisplayName(providerType);
+    const accountInitial = getAccountInitial(displayName);
+
+    card.style.setProperty('--provider-theme', providerTheme);
 
     card.innerHTML = `
         <div class="usage-card-collapsed-summary">
             <div class="collapsed-summary-row collapsed-summary-name-row">
                 <i class="fas fa-chevron-right usage-toggle-icon"></i>
-                <span class="collapsed-name" title="${displayName} ${t('usage.clickToManage')}" onclick="event.stopPropagation(); window.jumpToProviderNode('${providerType}', '${instance.uuid}', event)">${displayName}</span>
-                ${summary.plan ? `<span class="collapsed-plan-badge ${planClass}">${summary.plan}</span>` : ''}
+                <span class="usage-account-avatar" title="${escapeAttr(displayName)}">${accountInitial}</span>
+                <span class="collapsed-name" title="${escapeAttr(displayName)} ${escapeAttr(t('usage.clickToManage'))}" onclick="event.stopPropagation(); window.jumpToProviderNode('${providerType}', '${instance.uuid}', event)">${escapeHtml(displayName)}</span>
+                ${summary.plan ? `<span class="collapsed-plan-badge ${planClass}">${escapeHtml(summary.plan)}</span>` : ''}
                 ${instance.success ? '<i class="fas fa-check-circle status-success"></i>' : '<i class="fas fa-times-circle status-error"></i>'}
             </div>
             ${instance.success ? `
             <div class="collapsed-summary-row collapsed-summary-usage-row">
                 <div class="collapsed-progress-bar ${summary.status}"><div class="progress-fill" style="width: ${summary.usedPercent}%"></div></div>
                 <span class="collapsed-percent">
-                    ${summary.unit === 'percent' 
-                        ? `${summary.usedPercent.toFixed(1)}%` 
+                    ${summary.unit === 'percent'
+                        ? `${summary.usedPercent.toFixed(1)}%`
                         : `${formatNumber(summary.totalUsed || 0)} / ${formatNumber(summary.totalLimit || 0)}`
                     }
                 </span>
@@ -394,14 +402,17 @@ function createInstanceUsageCard(instance, providerType) {
         <div class="usage-card-expanded-content">
             <div class="usage-instance-header">
                 <div class="instance-header-top">
-                    <div class="instance-provider-type"><i class="${getProviderIcon(providerType)}"></i><span>${getProviderDisplayName(providerType)}</span></div>
+                    <div class="instance-provider-type"><i class="${providerIcon}"></i><span>${escapeHtml(providerName)}</span></div>
                     <div class="instance-status-badges">
                         ${instance.configFilePath ? `<button class="btn-download-config" title="${t('usage.card.downloadConfig')}"><i class="fas fa-download"></i></button>` : ''}
                         <button class="btn-refresh-usage" title="${t('usage.card.refresh')}"><i class="fas fa-sync-alt"></i></button>
                         ${instance.isDisabled ? `<span class="badge badge-disabled">${t('usage.card.status.disabled')}</span>` : `<span class="badge ${instance.isHealthy ? 'badge-healthy' : 'badge-unhealthy'}">${t(instance.isHealthy ? 'usage.card.status.healthy' : 'usage.card.status.unhealthy')}</span>`}
                     </div>
                 </div>
-                <div class="instance-name"><span class="instance-name-text" title="${displayName}">${displayName}</span></div>
+                <div class="instance-name">
+                    <span class="usage-account-avatar usage-account-avatar--lg" title="${escapeAttr(displayName)}">${accountInitial}</span>
+                    <span class="instance-name-text" title="${escapeAttr(displayName)}">${escapeHtml(displayName)}</span>
+                </div>
                 <div class="instance-user-info">
                     ${user.label ? `<span class="user-email"><i class="fas fa-envelope"></i> ${user.label}</span>` : ''}
                 </div>
@@ -410,15 +421,18 @@ function createInstanceUsageCard(instance, providerType) {
         </div>
     `;
 
-    card.querySelector('.usage-card-collapsed-summary').onclick = () => card.classList.toggle('collapsed');
-    
+    card.querySelector('.usage-card-collapsed-summary').onclick = (e) => {
+        e.stopPropagation();
+        card.classList.toggle('collapsed');
+    };
+
     if (instance.configFilePath) {
         card.querySelector('.btn-download-config').onclick = (e) => { e.stopPropagation(); downloadConfigFile(instance.configFilePath); };
     }
-    
-    card.querySelector('.btn-refresh-usage').onclick = (e) => { 
-        e.stopPropagation(); 
-        refreshSingleInstanceUsage(providerType, instance.uuid, displayName); 
+
+    card.querySelector('.btn-refresh-usage').onclick = (e) => {
+        e.stopPropagation();
+        refreshSingleInstanceUsage(providerType, instance.uuid, displayName);
     };
 
     const contentArea = card.querySelector('.usage-instance-content');
@@ -439,7 +453,7 @@ function renderUsageDetails(usage) {
     container.className = 'usage-details';
 
     const { summary, items } = usage;
-    
+
     if (summary?.usedPercent !== undefined) {
         const total = document.createElement('div');
         total.className = 'usage-section total-usage';
@@ -476,22 +490,26 @@ function renderUsageDetails(usage) {
     return container;
 }
 
+function getProviderConfigMap() {
+    if (!currentProviderConfigs) return {};
+    return currentProviderConfigs.reduce((map, config) => {
+        map[config.id] = config;
+        return map;
+    }, {});
+}
+
+function escapeAttr(value) {
+    return escapeHtml(value).replace(/'/g, '&#39;');
+}
+
 function getProviderDisplayName(type) {
-    if (currentProviderConfigs) {
-        const config = currentProviderConfigs.find(c => c.id === type);
-        if (config?.name) return config.name;
-    }
-    const names = { 'claude-kiro-oauth': 'Claude Kiro', 'gemini-cli-oauth': 'Gemini CLI', 'gemini-antigravity': 'Antigravity', 'openai-codex-oauth': 'Codex', 'grok-cli-oauth': 'Grok CLI', 'grok-web': 'Grok Web' };
-    return names[type] || type;
+    const config = currentProviderConfigs?.find(c => c.id === type);
+    if (config?.name) return config.name;
+    return resolveProviderConfig(type, getProviderConfigMap()).name || type;
 }
 
 function getProviderIcon(type) {
-    if (currentProviderConfigs) {
-        const config = currentProviderConfigs.find(c => c.id === type);
-        if (config?.icon) return config.icon.startsWith('fa-') ? `fas ${config.icon}` : config.icon;
-    }
-    const icons = { 'claude-kiro-oauth': 'fas fa-robot', 'gemini-cli-oauth': 'fas fa-gem', 'gemini-antigravity': 'fas fa-rocket', 'openai-codex-oauth': 'fas fa-terminal', 'grok-cli-oauth': 'fas fa-terminal', 'grok-web': 'fas fa-brain' };
-    return icons[type] || 'fas fa-server';
+    return getProviderIconClass(resolveProviderConfig(type, getProviderConfigMap()));
 }
 
 async function downloadConfigFile(path) {

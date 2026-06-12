@@ -67,6 +67,69 @@ function makeFallbackEmail(accountId, index) {
     return `codex-import-${index}`;
 }
 
+function hasAccessTokenField(raw) {
+    if (!isPlainObject(raw)) return false;
+    const nestedCredentials = isPlainObject(raw.credentials) ? raw.credentials : {};
+    return Boolean(
+        cleanString(raw.access_token) ||
+        cleanString(raw.accessToken) ||
+        cleanString(nestedCredentials.access_token) ||
+        cleanString(nestedCredentials.accessToken)
+    );
+}
+
+/**
+ * Chuẩn hóa JSON phiên ChatGPT/Codex CLI (accessToken, user, account, expires...)
+ */
+export function flattenChatGptSessionExport(raw) {
+    if (!isPlainObject(raw)) return raw;
+
+    const hasSessionShape = Boolean(
+        cleanString(raw.accessToken) &&
+        (isPlainObject(raw.user) || isPlainObject(raw.account) || raw.authProvider === 'openai')
+    );
+    if (!hasSessionShape) return raw;
+
+    const flattened = { ...raw };
+
+    if (!flattened.access_token && raw.accessToken) {
+        flattened.access_token = raw.accessToken;
+    }
+    if (!flattened.id_token && raw.idToken) {
+        flattened.id_token = raw.idToken;
+    }
+    if (!flattened.refresh_token && raw.refreshToken) {
+        flattened.refresh_token = raw.refreshToken;
+    }
+    if (!flattened.expired && raw.expires) {
+        flattened.expired = raw.expires;
+    }
+    if (!flattened.expiresAt && raw.expires) {
+        flattened.expiresAt = raw.expires;
+    }
+
+    if (isPlainObject(raw.account)) {
+        if (!flattened.account_id && raw.account.id) {
+            flattened.account_id = raw.account.id;
+        }
+        if (!flattened.chatgpt_account_id && raw.account.id) {
+            flattened.chatgpt_account_id = raw.account.id;
+        }
+    }
+
+    if (isPlainObject(raw.user)) {
+        if (!flattened.email && raw.user.email) {
+            flattened.email = raw.user.email;
+        }
+    }
+
+    return flattened;
+}
+
+export function preprocessCodexImportPayload(raw) {
+    return flattenChatGptSessionExport(raw);
+}
+
 function normalizeCredential(raw, source, index, exportedAt = null) {
     if (!isPlainObject(raw)) {
         return {
@@ -76,11 +139,12 @@ function normalizeCredential(raw, source, index, exportedAt = null) {
         };
     }
 
-    const nestedCredentials = isPlainObject(raw.credentials) ? raw.credentials : {};
-    const nestedExtra = isPlainObject(raw.extra) ? raw.extra : {};
-    const data = { ...raw, ...nestedCredentials };
+    const prepared = flattenChatGptSessionExport(raw);
+    const nestedCredentials = isPlainObject(prepared.credentials) ? prepared.credentials : {};
+    const nestedExtra = isPlainObject(prepared.extra) ? prepared.extra : {};
+    const data = { ...prepared, ...nestedCredentials };
 
-    const accessToken = cleanString(data.access_token);
+    const accessToken = cleanString(data.access_token || data.accessToken);
     if (!accessToken) {
         return {
             error: '缺少 access_token',
@@ -123,8 +187,8 @@ function normalizeCredential(raw, source, index, exportedAt = null) {
 
     const refreshToken = cleanString(data.refresh_token);
     const expired = expiryFromValues({
-        expired: data.expired,
-        expiresAt: data.expiresAt,
+        expired: data.expired || data.expires,
+        expiresAt: data.expiresAt || data.expires,
         expires_at: data.expires_at,
         expires_in: data.expires_in,
         claims
@@ -149,6 +213,11 @@ function normalizeCredential(raw, source, index, exportedAt = null) {
 export function normalizeCpaCodexCredentials(payload) {
     const items = Array.isArray(payload) ? payload : [payload];
     return items.map((item, index) => normalizeCredential(item, 'cpa', index + 1));
+}
+
+export function normalizeChatGptSessionCredentials(payload) {
+    const items = Array.isArray(payload) ? payload : [payload];
+    return items.map((item, index) => normalizeCredential(item, 'chatgpt-session', index + 1));
 }
 
 export function normalizeSub2ApiCodexCredentials(payload) {
@@ -195,6 +264,34 @@ export function normalizeSub2ApiCodexCredentials(payload) {
     return results;
 }
 
+export function detectCodexImportSource(payload) {
+    if (Array.isArray(payload)) {
+        if (payload.length === 0) return 'cpa';
+        return detectCodexImportSource(payload[0]);
+    }
+
+    if (!isPlainObject(payload)) return 'cpa';
+
+    if (Array.isArray(payload.accounts)) return 'sub2api';
+
+    if (
+        cleanString(payload.accessToken) &&
+        (isPlainObject(payload.user) || isPlainObject(payload.account) || payload.authProvider === 'openai')
+    ) {
+        return 'chatgpt-session';
+    }
+
+    if (payload.platform === 'openai' && isPlainObject(payload.credentials)) {
+        return 'sub2api';
+    }
+
+    return 'cpa';
+}
+
+export function normalizeCodexExternalCredentialsAuto(payload) {
+    return normalizeCodexExternalCredentials(detectCodexImportSource(payload), payload);
+}
+
 export function normalizeCodexExternalCredentials(source, payload) {
     if (source === 'cpa') {
         return normalizeCpaCodexCredentials(payload);
@@ -204,5 +301,11 @@ export function normalizeCodexExternalCredentials(source, payload) {
         return normalizeSub2ApiCodexCredentials(payload);
     }
 
+    if (source === 'chatgpt-session') {
+        return normalizeChatGptSessionCredentials(payload);
+    }
+
     throw new Error(`Unsupported Codex import source: ${source}`);
 }
+
+export { hasAccessTokenField };

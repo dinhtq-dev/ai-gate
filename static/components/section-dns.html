@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="components/section-dns.css">
+<section id="dns" class="section" aria-labelledby="dns-title">
+    <div class="dns-page-header">
+        <div class="dns-page-header__text">
+            <h2 id="dns-title" data-i18n="mitm.dns.title">DNS Redirection</h2>
+            <p class="dns-subtitle" data-i18n="mitm.dns.desc">Bật để chuyển traffic công cụ qua MITM (ghi vào file hosts). Tắt để khôi phục routing bình thường. Độc lập với Start/Stop MITM.</p>
+        </div>
+        <button id="refreshDnsBtn" class="btn btn-secondary btn-toolbar" type="button" data-i18n-title="common.refresh" title="Làm mới">
+            <i class="fas fa-sync-alt"></i> <span data-i18n="common.refresh">Làm mới</span>
+        </button>
+    </div>
+
+    <div class="dns-overview">
+        <div class="dns-panel">
+            <div class="dns-panel-header">
+                <div class="dns-panel-title">
+                    <i class="fas fa-globe" aria-hidden="true"></i>
+                    <h3 data-i18n="mitm.dns.panelTitle">DNS Redirection</h3>
+                </div>
+            </div>
+            <div class="dns-panel-body">
+                <div id="dnsList" class="dns-grid"></div>
+                <div class="dns-tip">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                    <span data-i18n="mitm.dns.tip">Trên Windows có thể hiện UAC khi bật/tắt DNS — cần phê duyệt để sửa file hosts. Trạng thái phản ánh file hosts thực tế, không phải cache trình duyệt.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

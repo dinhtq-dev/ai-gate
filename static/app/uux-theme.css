@@ -52,6 +52,7 @@
 /* Panel & card titles — ấm, icon cam (XMITM) */
 .guide-panel-title h3,
 .tutorial-panel-title h3,
+.dns-panel-title h3,
 .tutorial-panel h3,
 .system-info-panel h3,
 .dashboard-panel__title h3,
@@ -77,6 +78,7 @@
 
 .guide-panel-title i,
 .tutorial-panel-title i,
+.dns-panel-title i,
 .tutorial-panel h3 i,
 .access-panel-title i,
 .system-info-panel h3 i,
@@ -99,6 +101,7 @@
 }
 
 [data-theme="dark"] .guide-panel-title h3,
+[data-theme="dark"] .dns-panel-title h3,
 [data-theme="dark"] .tutorial-panel h3,
 [data-theme="dark"] .system-info-panel h3,
 [data-theme="dark"] .routing-examples-panel h3,

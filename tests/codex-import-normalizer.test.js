@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { normalizeCodexExternalCredentials } from '../src/auth/codex-import-normalizer.js';
+import { normalizeCodexExternalCredentials, detectCodexImportSource } from '../src/auth/codex-import-normalizer.js';
 
 describe('Codex external import normalizer', () => {
     test('normalizes CPA access-token-only credential', () => {
@@ -113,5 +113,33 @@ describe('Codex external import normalizer', () => {
             source: 'cpa',
             error: '缺少 access_token'
         });
+    });
+
+    test('normalizes ChatGPT session export with accessToken and nested user/account', () => {
+        const [credential] = normalizeCodexExternalCredentials('chatgpt-session', {
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6eyJjaGF0Z3B0X2FjY291bnRfaWQiOiJhY2Nfc2VzcyJ9LCJleHAiOjE4MDAwMDAwMDB9.sig',
+            expires: '2026-09-10T16:41:28.839Z',
+            authProvider: 'openai',
+            user: { email: 'user@example.com' },
+            account: { id: 'acc_session', planType: 'free' },
+            sessionToken: 'encrypted-session-token'
+        });
+
+        expect(credential).toMatchObject({
+            source: 'chatgpt-session',
+            access_token: expect.stringContaining('eyJ'),
+            account_id: 'acc_session',
+            email: 'user@example.com',
+            expired: '2026-09-10T16:41:28.839Z',
+            access_token_only: true
+        });
+    });
+
+    test('auto-detects ChatGPT session format', () => {
+        expect(detectCodexImportSource({
+            accessToken: 'token',
+            user: { email: 'user@example.com' },
+            account: { id: 'acc' }
+        })).toBe('chatgpt-session');
     });
 });

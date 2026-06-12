@@ -1,0 +1,242 @@
+/* DNS Redirection — XMITM glass (tab riêng) */
+
+.dns-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.dns-page-header__text h2 {
+    margin: 0 0 0.375rem;
+}
+
+.dns-subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.55;
+    max-width: 72ch;
+}
+
+.dns-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.dns-panel {
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+}
+
+.dns-panel-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dns-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.dns-panel-title i {
+    color: var(--title-accent);
+    filter: drop-shadow(0 0 6px rgba(var(--primary-rgb), 0.35));
+}
+
+.dns-panel-title h3 {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--title-text);
+}
+
+.dns-panel-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.dns-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.dns-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.125rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dns-card:hover {
+    border-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.dns-card--active {
+    border-color: rgba(var(--primary-rgb), 0.35);
+    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.08);
+}
+
+.dns-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.dns-card__info {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+}
+
+.dns-card__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--text-accent);
+    flex-shrink: 0;
+}
+
+.dns-card--active .dns-card__icon {
+    background: rgba(var(--primary-rgb), 0.18);
+}
+
+.dns-card__label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.dns-card__state--on {
+    display: block;
+    font-size: 0.625rem;
+    font-family: var(--font-mono);
+    margin-top: 0.125rem;
+    color: var(--text-accent);
+    letter-spacing: 0.04em;
+}
+
+.dns-switch {
+    position: relative;
+    width: 2.75rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+}
+
+.dns-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.dns-switch__track {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-secondary);
+    border-radius: 9999px;
+    border: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+.dns-switch__track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.dns-switch input:checked + .dns-switch__track {
+    background: rgba(var(--primary-rgb), 0.85);
+    border-color: transparent;
+}
+
+.dns-switch input:checked + .dns-switch__track::after {
+    transform: translateX(1.25rem);
+    background: #fff;
+}
+
+.dns-hosts {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.dns-hosts__label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    margin-bottom: 0.125rem;
+}
+
+.dns-hosts__line {
+    font-size: 0.6875rem;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+}
+
+.dns-hosts__line span {
+    color: var(--text-accent);
+}
+
+.dns-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    margin-top: 1rem;
+    padding: 0.875rem 1rem;
+    background: rgba(var(--primary-rgb), 0.08);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.dns-tip i {
+    color: var(--text-accent);
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.dns-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+@media (max-width: 768px) {
+    .dns-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dns-panel-body {
+        padding: 1rem;
+    }
+}

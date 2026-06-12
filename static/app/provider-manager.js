@@ -1,13 +1,13 @@
 // 提供商管理功能模块
 
 import { providerStats, updateProviderStats } from './constants.js';
-import { showToast, formatUptime, getProviderConfigs, getBaseProviderConfigs, bindOnce, escapeHtml } from './utils.js';
+import { showToast, formatUptime, getProviderConfigs, getBaseProviderConfigs, bindOnce, escapeHtml, buildProviderIconChip, resolveProviderConfig, getProviderThemeColor } from './utils.js';
 import { fileUploadHandler } from './file-upload.js';
 import { t, getCurrentLanguage } from './i18n.js';
 import { renderRoutingExamples } from './routing-examples.js';
 import { updateModelsProviderConfigs } from './models-manager.js';
 import { updateTutorialProviderConfigs } from './tutorial-manager.js';
-import { updateUsageProviderConfigs } from './usage-manager.js';
+import { updateUsageProviderConfigs, loadUsagePageData, reapplyUsageDisplay } from './usage-manager.js';
 import { updateConfigProviderConfigs } from './config-manager.js';
 import { loadConfigList, updateProviderFilterOptions } from './upload-config-manager.js';
 import { setServiceMode } from './event-handlers.js';
@@ -304,6 +304,7 @@ async function loadProvidersPageData(forceRefreshSupported = false) {
     if (data?.providers) {
         await refreshProvidersHandoffSummary(data.providers, data.supportedProviders || cachedSupportedProviders || []);
     }
+    await loadUsagePageData();
 }
 
 /**
@@ -386,7 +387,6 @@ function renderProviders(providers, supportedProviders = []) {
         const providerDiv = document.createElement('div');
         providerDiv.className = 'provider-item';
         providerDiv.dataset.providerType = providerType;
-        providerDiv.style.cursor = 'pointer';
 
         const healthyCount = accounts.filter(acc => acc.isHealthy && !acc.isDisabled).length;
         const totalCount = accounts.length;
@@ -422,37 +422,55 @@ function renderProviders(providers, supportedProviders = []) {
 
         // 获取显示名称
         const displayName = configMap[providerType]?.name || providerType;
+        const providerTheme = getProviderThemeColor(configMap[providerType] || resolveProviderConfig(providerType, configMap));
 
         providerDiv.innerHTML = `
-            <div class="provider-header">
-                <div class="provider-name">
-                    <span class="provider-type-text">${displayName}</span>
+            <div class="provider-item-main">
+                <div class="provider-header">
+                    <div class="provider-name">
+                        ${buildProviderIconChip(providerType, configMap)}
+                        <div class="provider-name-text">
+                            <span class="provider-type-text">${displayName}</span>
+                            <span class="provider-type-id">${providerType}</span>
+                        </div>
+                    </div>
+                    <div class="provider-header-right">
+                        ${generateAddGroupButton(providerType)}
+                        ${generateAuthButton(providerType)}
+                        <div class="provider-status ${statusClass}">
+                            <i class="fas fa-${statusIcon}"></i>
+                            <span>${statusText}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="provider-header-right">
-                    ${generateAddGroupButton(providerType)}
-                    ${generateAuthButton(providerType)}
-                    <div class="provider-status ${statusClass}">
-                        <i class="fas fa-${statusIcon}"></i>
-                        <span>${statusText}</span>
+                <div class="provider-stats">
+                    <div class="provider-stat">
+                        <span class="provider-stat-label" data-i18n="providers.stat.totalAccounts">${t('providers.stat.totalAccounts')}</span>
+                        <span class="provider-stat-value">${totalCount}</span>
+                    </div>
+                    <div class="provider-stat">
+                        <span class="provider-stat-label" data-i18n="providers.stat.healthyAccounts">${t('providers.stat.healthyAccounts')}</span>
+                        <span class="provider-stat-value">${healthyCount}</span>
+                    </div>
+                    <div class="provider-stat">
+                        <span class="provider-stat-label" data-i18n="providers.stat.usageCount">${t('providers.stat.usageCount')}</span>
+                        <span class="provider-stat-value">${usageCount}</span>
+                    </div>
+                    <div class="provider-stat">
+                        <span class="provider-stat-label" data-i18n="providers.stat.errorCount">${t('providers.stat.errorCount')}</span>
+                        <span class="provider-stat-value">${errorCount}</span>
                     </div>
                 </div>
             </div>
-            <div class="provider-stats">
-                <div class="provider-stat">
-                    <span class="provider-stat-label" data-i18n="providers.stat.totalAccounts">${t('providers.stat.totalAccounts')}</span>
-                    <span class="provider-stat-value">${totalCount}</span>
+            <div class="provider-usage-panel">
+                <div class="provider-usage-panel__head">
+                    <span class="provider-usage-panel__title">${buildProviderIconChip(providerType, configMap, 'sm')} <span>${t('providers.usage.title')}</span></span>
+                    <button type="button" class="btn btn-secondary btn-sm btn-refresh-provider-usage" data-provider="${providerType}" title="${t('usage.doubleClickToRefresh')}">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
-                <div class="provider-stat">
-                    <span class="provider-stat-label" data-i18n="providers.stat.healthyAccounts">${t('providers.stat.healthyAccounts')}</span>
-                    <span class="provider-stat-value">${healthyCount}</span>
-                </div>
-                <div class="provider-stat">
-                    <span class="provider-stat-label" data-i18n="providers.stat.usageCount">${t('providers.stat.usageCount')}</span>
-                    <span class="provider-stat-value">${usageCount}</span>
-                </div>
-                <div class="provider-stat">
-                    <span class="provider-stat-label" data-i18n="providers.stat.errorCount">${t('providers.stat.errorCount')}</span>
-                    <span class="provider-stat-value">${errorCount}</span>
+                <div class="provider-usage-content" data-provider="${providerType}">
+                    <div class="usage-empty-inline"><span data-i18n="usage.loading">${t('usage.loading')}</span></div>
                 </div>
             </div>
         `;
@@ -462,11 +480,18 @@ function renderProviders(providers, supportedProviders = []) {
             providerDiv.classList.add('empty-provider');
         }
 
-        // 添加点击事件 - 整个提供商组都可以点击
-        providerDiv.addEventListener('click', (e) => {
-            e.preventDefault();
-            openProviderManager(providerType);
-        });
+        providerDiv.style.setProperty('--provider-theme', providerTheme);
+
+        providerDiv.style.cursor = 'default';
+
+        const providerMain = providerDiv.querySelector('.provider-item-main');
+        if (providerMain) {
+            providerMain.style.cursor = 'pointer';
+            providerMain.addEventListener('click', (e) => {
+                e.preventDefault();
+                openProviderManager(providerType);
+            });
+        }
 
         container.appendChild(providerDiv);
         
@@ -540,6 +565,8 @@ function renderProviders(providers, supportedProviders = []) {
 
     // 渲染仪表盘提供商状态概览
     renderProviderStatusOverview(providers, configMap, sortedProviderTypes);
+
+    reapplyUsageDisplay();
 }
 
 /**
@@ -630,7 +657,10 @@ function renderProviderStatusOverview(providers, configMap, sortedProviderTypes)
 
         card.innerHTML = `
             <div class="provider-card-head">
-                <span class="provider-name" title="${displayName}">${displayName}</span>
+                <span class="provider-name" title="${displayName}">
+                    ${buildProviderIconChip(type, configMap, 'sm')}
+                    <span>${displayName}</span>
+                </span>
                 <span class="provider-ratio">${healthyCount}/${totalCount}</span>
             </div>
 
@@ -928,6 +958,13 @@ function showCodexAuthMethodSelector(providerType) {
                             <div style="font-size: 12px; color: #666;" data-i18n="oauth.codex.batchImportDesc">${t('oauth.codex.batchImportDesc')}</div>
                         </div>
                     </button>
+                    <button class="auth-method-btn" data-method="chatgpt-session-import" style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;">
+                        <i class="fas fa-paste" style="font-size: 24px; color: #0ea5e9;"></i>
+                        <div style="text-align: left;">
+                            <div style="font-weight: 600; color: #333;" data-i18n="oauth.codex.sessionImport">${t('oauth.codex.sessionImport')}</div>
+                            <div style="font-size: 12px; color: #666;" data-i18n="oauth.codex.sessionImportDesc">${t('oauth.codex.sessionImportDesc')}</div>
+                        </div>
+                    </button>
                     <button class="auth-method-btn" data-method="cpa-import" style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; transition: all 0.2s;">
                         <i class="fas fa-file-code" style="font-size: 24px; color: #6366f1;"></i>
                         <div style="text-align: left;">
@@ -978,6 +1015,8 @@ function showCodexAuthMethodSelector(providerType) {
             
             if (method === 'batch-import') {
                 showCodexBatchImportModal(providerType);
+            } else if (method === 'chatgpt-session-import') {
+                showCodexExternalImportModal(providerType, 'chatgpt-session');
             } else if (method === 'cpa-import') {
                 showCodexExternalImportModal(providerType, 'cpa');
             } else if (method === 'sub2api-import') {
@@ -1104,7 +1143,7 @@ function showCodexBatchImportModal(providerType) {
                 return;
             }
             const data = JSON.parse(val);
-            const tokens = Array.isArray(data) ? data : [data];
+            const tokens = normalizeCodexImportTokens(data);
             statsDiv.style.display = 'block';
             tokenCountValue.textContent = tokens.length;
         } catch (e) {
@@ -1125,7 +1164,7 @@ function showCodexBatchImportModal(providerType) {
         try {
             const val = textarea.value.trim();
             const data = JSON.parse(val);
-            tokens = Array.isArray(data) ? data : [data];
+            tokens = normalizeCodexImportTokens(data);
         } catch (e) {
             showToast(t('common.error'), t('oauth.codex.noTokens'), 'error');
             return;
@@ -1169,7 +1208,14 @@ function showCodexBatchImportModal(providerType) {
             });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.error) errorMessage = errBody.error;
+                } catch {
+                    // ignore parse errors
+                }
+                throw new Error(errorMessage);
             }
             
             const reader = response.body.getReader();
@@ -1521,7 +1567,14 @@ function showGrokCliBatchImportModal(providerType) {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.error) errorMessage = errBody.error;
+                } catch {
+                    // ignore parse errors
+                }
+                throw new Error(errorMessage);
             }
 
             const reader = response.body.getReader();
@@ -1638,8 +1691,48 @@ function showGrokCliBatchImportModal(providerType) {
     };
 }
 
+function codexImportHasAccessToken(item) {
+    if (!item || typeof item !== 'object') return false;
+    return Boolean(item.access_token || item.accessToken || item.credentials?.access_token || item.credentials?.accessToken);
+}
+
+function isChatGptSessionPayload(item) {
+    if (!item || typeof item !== 'object') return false;
+    return Boolean(
+        item.accessToken &&
+        (item.user || item.account || item.authProvider === 'openai')
+    );
+}
+
+function convertChatGptSessionForImport(item) {
+    if (!isChatGptSessionPayload(item)) return item;
+
+    return {
+        type: 'codex',
+        access_token: item.accessToken,
+        id_token: item.idToken || item.id_token || '',
+        refresh_token: item.refreshToken || item.refresh_token || '',
+        account_id: item.account?.id || item.account_id || '',
+        email: item.user?.email || item.email || '',
+        expired: item.expires || item.expired || item.expiresAt || '',
+        last_refresh: new Date().toISOString()
+    };
+}
+
+function normalizeCodexImportTokens(data) {
+    const items = Array.isArray(data) ? data : [data];
+    return items.map(convertChatGptSessionForImport);
+}
+
 function getCodexExternalImportMeta(source) {
     const examples = {
+        'chatgpt-session': `{
+  "accessToken": "eyJ...",
+  "expires": "2026-09-10T16:41:28.839Z",
+  "authProvider": "openai",
+  "user": { "email": "user@example.com" },
+  "account": { "id": "account-uuid", "planType": "free" }
+}`,
         cpa: `{
   "type": "codex",
   "account_id": "account-id",
@@ -1666,11 +1759,27 @@ function getCodexExternalImportMeta(source) {
 }`
     };
 
+    const titles = {
+        'chatgpt-session': t('oauth.codex.sessionImport'),
+        cpa: t('oauth.codex.cpaImport'),
+        sub2api: t('oauth.codex.sub2apiImport')
+    };
+    const instructions = {
+        'chatgpt-session': t('oauth.codex.sessionImportInstructions'),
+        cpa: t('oauth.codex.cpaImportInstructions'),
+        sub2api: t('oauth.codex.sub2apiImportInstructions')
+    };
+    const placeholders = {
+        'chatgpt-session': t('oauth.codex.sessionImportPlaceholder'),
+        cpa: t('oauth.codex.cpaImportPlaceholder'),
+        sub2api: t('oauth.codex.sub2apiImportPlaceholder')
+    };
+
     return {
-        title: source === 'cpa' ? t('oauth.codex.cpaImport') : t('oauth.codex.sub2apiImport'),
-        instructions: source === 'cpa' ? t('oauth.codex.cpaImportInstructions') : t('oauth.codex.sub2apiImportInstructions'),
-        placeholder: source === 'cpa' ? t('oauth.codex.cpaImportPlaceholder') : t('oauth.codex.sub2apiImportPlaceholder'),
-        example: examples[source]
+        title: titles[source] || titles.cpa,
+        instructions: instructions[source] || instructions.cpa,
+        placeholder: placeholders[source] || placeholders.cpa,
+        example: examples[source] || examples.cpa
     };
 }
 
@@ -1685,7 +1794,7 @@ function getCodexExternalImportStats(source, data) {
             accounts = [data];
         }
         const openaiAccounts = accounts.filter(account => !account.platform || account.platform === 'openai');
-        const validAccounts = openaiAccounts.filter(account => account?.credentials?.access_token);
+        const validAccounts = openaiAccounts.filter(account => codexImportHasAccessToken(account));
         return {
             total: accounts.length,
             valid: validAccounts.length,
@@ -1694,7 +1803,7 @@ function getCodexExternalImportStats(source, data) {
     }
 
     const items = Array.isArray(data) ? data : [data];
-    const validItems = items.filter(item => item?.access_token);
+    const validItems = items.filter(item => codexImportHasAccessToken(item));
     return {
         total: items.length,
         valid: validItems.length,
@@ -1705,7 +1814,7 @@ function getCodexExternalImportStats(source, data) {
 /**
  * 显示 Codex CPA/sub2api 外部格式批量导入模态框
  * @param {string} providerType - 提供商类型
- * @param {'cpa'|'sub2api'} source - 外部来源
+ * @param {'cpa'|'sub2api'|'chatgpt-session'} source - 外部来源
  */
 function showCodexExternalImportModal(providerType, source) {
     const meta = getCodexExternalImportMeta(source);
@@ -1840,16 +1949,31 @@ function showCodexExternalImportModal(providerType, source) {
         let importSuccess = false;
 
         try {
-            const response = await fetch('/api/codex/import-external-credentials', {
+            const isSessionImport = source === 'chatgpt-session';
+            const requestUrl = isSessionImport
+                ? '/api/codex/batch-import-tokens'
+                : '/api/codex/import-external-credentials';
+            const requestBody = isSessionImport
+                ? { tokens: normalizeCodexImportTokens(payload) }
+                : { source, payload };
+
+            const response = await fetch(requestUrl, {
                 method: 'POST',
                 headers: window.apiClient ? window.apiClient.getAuthHeaders() : {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ source, payload })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.error) errorMessage = errBody.error;
+                } catch {
+                    // ignore parse errors
+                }
+                throw new Error(errorMessage);
             }
 
             const reader = response.body.getReader();
@@ -2202,7 +2326,14 @@ sso_token_2_def...</pre>
             });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.error) errorMessage = errBody.error;
+                } catch {
+                    // ignore parse errors
+                }
+                throw new Error(errorMessage);
             }
             
             const reader = response.body.getReader();
@@ -2656,7 +2787,14 @@ function showGeminiBatchImportModal(providerType) {
             });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.error) errorMessage = errBody.error;
+                } catch {
+                    // ignore parse errors
+                }
+                throw new Error(errorMessage);
             }
             
             const reader = response.body.getReader();
@@ -2908,7 +3046,14 @@ function showKiroBatchImportModal() {
             });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    if (errBody?.error) errorMessage = errBody.error;
+                } catch {
+                    // ignore parse errors
+                }
+                throw new Error(errorMessage);
             }
             
             const reader = response.body.getReader();
