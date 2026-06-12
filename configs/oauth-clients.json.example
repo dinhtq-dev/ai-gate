@@ -1,0 +1,10 @@
+{
+  "gemini-cli-oauth": {
+    "clientId": "YOUR_GEMINI_CLI_OAUTH_CLIENT_ID",
+    "clientSecret": "YOUR_GEMINI_CLI_OAUTH_CLIENT_SECRET"
+  },
+  "gemini-antigravity": {
+    "clientId": "YOUR_ANTIGRAVITY_OAUTH_CLIENT_ID",
+    "clientSecret": "YOUR_ANTIGRAVITY_OAUTH_CLIENT_SECRET"
+  }
+}

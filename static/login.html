@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi-VN" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="login.title">Đăng nhập - AIGate</title>
+    <link rel="icon" type="image/x-icon" href="https://src.hex2077.dev/logo/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="app/base.css">
+    <link rel="stylesheet" href="app/uux-theme.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: var(--bg-secondary);
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(var(--primary-rgb), 0.1) 0%, transparent 60%);
+            background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), 100% 100%;
+            background-attachment: fixed;
+        }
+
+        .login-container {
+            background: var(--bg-glass-strong);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-glass);
+            border: 1px solid rgba(var(--primary-rgb), 0.15);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+
+        .logo h1 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-10);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.35);
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.45);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer p {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="app/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-page">
+    <div style="position: absolute; top: 20px; right: 20px;" id="langSwitcherContainer"></div>
+    <div class="login-container">
+        <div class="logo">
+            <img src="https://src.hex2077.dev/logo/favicon.ico" alt="Logo" onerror="this.style.display='none'">
+            <h1 data-i18n="header.title">AIGate</h1>
+            <p data-i18n="login.heading">Vui lòng đăng nhập để tiếp tục</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password" data-i18n="login.password">Mật khẩu</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    data-i18n="login.passwordPlaceholder"
+                    placeholder="请输入密码"
+                    autocomplete="current-password"
+                    required
+                >Vui lòng nhập mật khẩu<div class="error-message" id="errorMessage" data-i18n="login.error.incorrect">Mật khẩu không đúng, vui lòng thử lại</div>
+            </div>
+
+            <button type="submit" class="login-button" id="loginButton" data-i18n="login.button">Đăng nhập</button>
+        </form>
+
+        <div class="footer">
+            <p data-i18n="login.copyright">&copy; 2077 AIGate. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initI18n, t, setLanguage } from './app/i18n.js';
+        import { createLanguageSwitcher, getLangShortLabel } from './app/language-switcher.js';
+
+        // 初始化多语言
+        initI18n();
+        
+        // 初始化语言切换器
+        const langContainer = document.getElementById('langSwitcherContainer');
+        if (langContainer) {
+            const switcher = createLanguageSwitcher();
+            langContainer.appendChild(switcher);
+
+            const languageBtn = switcher.querySelector('#languageBtn');
+            const languageDropdown = switcher.querySelector('#languageDropdown');
+            const languageOptions = switcher.querySelectorAll('.language-option');
+
+            languageBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                languageDropdown.classList.toggle('show');
+            });
+
+            languageOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const lang = option.getAttribute('data-lang');
+                    setLanguage(lang);
+                    switcher.querySelector('.current-lang').textContent = getLangShortLabel(lang);
+                    languageOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    languageDropdown.classList.remove('show');
+                });
+            });
+
+            document.addEventListener('click', () => {
+                languageDropdown.classList.remove('show');
+            });
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginButton = document.getElementById('loginButton');
+
+        // 检查是否已经登录
+        checkLoginStatus();
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = passwordInput.value.trim();
+            
+            if (!password) {
+                showError(t('login.error.empty'));
+                return;
+            }
+
+            // 禁用按钮并显示加载状态
+            loginButton.disabled = true;
+            loginButton.innerHTML = `<span class="loading"></span>${t('login.loggingIn')}`;
+            errorMessage.classList.remove('show');
+
+            try {
+                // 直接使用fetch进行登录请求（登录页面不需要token）
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // 登录成功，保存token
+                    localStorage.setItem('authToken', data.token);
+                    
+                    // 跳转到主页
+                    window.location.href = '/';
+                } else {
+                    const errorMsg = data.messageCode ? t(data.messageCode, data.messageParams) : (data.message || t('login.error.incorrect'));
+                    showError(errorMsg);
+                    loginButton.disabled = false;
+                    loginButton.innerHTML = t('login.button');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                showError(t('login.error.failed'));
+                loginButton.disabled = false;
+                loginButton.innerHTML = t('login.button');
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            passwordInput.classList.add('error');
+            
+            setTimeout(() => {
+                passwordInput.classList.remove('error');
+            }, 300);
+        }
+
+        function checkLoginStatus() {
+            const token = localStorage.getItem('authToken');
+            
+            if (token) {
+                // Token存在，跳转到主页
+                window.location.href = '/';
+            }
+        }
+
+        // 监听输入，清除错误提示
+        passwordInput.addEventListener('input', () => {
+            errorMessage.classList.remove('show');
+        });
+
+        // 页面加载时聚焦到密码输入框
+        passwordInput.focus();
+    </script>
+    </body>
+</html>

@@ -1,0 +1,218 @@
+<link rel="stylesheet" href="components/section-guide.css">
+<!-- Guide Section -->
+<section id="guide" class="section" aria-labelledby="guide-title">
+    <h2 id="guide-title" data-i18n="guide.title">Hướng dẫn sử dụng</h2>
+    
+    <!-- 项目简介 -->
+    <div class="guide-panel">
+        <h3><i class="fas fa-info-circle"></i> <span data-i18n="guide.intro.title">Giới thiệu</span></h3>
+        <div class="guide-content">
+            <p data-i18n="guide.intro.desc">AIGate là dịch vụ proxy API phá vỡ giới hạn client, chuyển đổi các model lớn miễn phí như Gemini, Antigravity, Qwen Code và Kiro thành giao diện chuẩn tương thích OpenAI mà mọi ứng dụng có thể gọi.</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-plug"></i></div>
+                    <h4 data-i18n="guide.intro.feature1.title">Truy cập thống nhất</h4>
+                    <p data-i18n="guide.intro.feature1.desc">Truy cập nhiều model lớn với một cấu hình qua giao thức chuẩn tương thích OpenAI</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h4 data-i18n="guide.intro.feature2.title">Vượt giới hạn</h4>
+                    <p data-i18n="guide.intro.feature2.desc">Hiệu quả vượt qua giới hạn tốc độ và hạn mức API miễn phí bằng ủy quyền OAuth</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-exchange-alt"></i></div>
+                    <h4 data-i18n="guide.intro.feature3.title">Chuyển đổi giao thức</h4>
+                    <p data-i18n="guide.intro.feature3.desc">Hỗ trợ chuyển đổi thông minh giữa giao thức OpenAI, Claude và Gemini</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-server"></i></div>
+                    <h4 data-i18n="guide.intro.feature4.title">Pool tài khoản</h4>
+                    <p data-i18n="guide.intro.feature4.desc">Hỗ trợ luân phiên đa tài khoản, chuyển dự phòng tự động và hạ cấp cấu hình</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作流程图 -->
+    <div class="guide-panel">
+        <h3><i class="fas fa-project-diagram"></i> <span data-i18n="guide.flow.title">Sơ đồ quy trình vận hành</span></h3>
+        <div class="guide-content">
+            <div class="process-flow">
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4 data-i18n="guide.flow.step1.title">Cấu hình</h4>
+                        <p data-i18n="guide.flow.step1.desc">Đặt tham số cơ bản trên trang "Cấu hình"</p>
+                        <ul>
+                            <li data-i18n="guide.flow.step1.item1">Đặt API Key</li>
+                            <li data-i18n="guide.flow.step1.item2">Chọn nhà cung cấp model khởi tạo khi khởi động</li>
+                            <li data-i18n="guide.flow.step1.item3">Cấu hình tùy chọn nâng cao</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="flow-arrow">→</div>
+                
+                <div class="flow-step flow-step-branch">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4 data-i18n="guide.flow.step2.title">Tạo xác thực</h4>
+                        <p data-i18n="guide.flow.step2.desc">Tạo ủy quyền OAuth trên trang "Nhóm nhà cung cấp"</p>
+                        <div class="branch-options">
+                            <div class="branch-option">
+                                <div class="branch-label" data-i18n="guide.flow.step2.method1">Cách 1: Ủy quyền OAuth</div>
+                                <ul>
+                                    <li data-i18n="guide.flow.step2.method1.item1">Nhấn nút "Tạo xác thực"</li>
+                                    <li data-i18n="guide.flow.step2.method1.item2">Hoàn tất đăng nhập OAuth trong pop-up</li>
+                                    <li data-i18n="guide.flow.step2.method1.item3">Xác thực được lưu tự động</li>
+                                </ul>
+                            </div>
+                            <div class="branch-divider" data-i18n="guide.flow.step2.or">hoặc</div>
+                            <div class="branch-option">
+                                <div class="branch-label" data-i18n="guide.flow.step2.method2">Cách 2: Tải lên thủ công</div>
+                                <ul>
+                                    <li data-i18n="guide.flow.step2.method2.item1">Thêm node nhà cung cấp mới</li>
+                                    <li data-i18n="guide.flow.step2.method2.item2">Tải lên file ủy quyền hiện có</li>
+                                    <li data-i18n="guide.flow.step2.method2.item3">Liên kết thủ công đường dẫn xác thực</li>
+                                </ul>
+                            </div>
+                            <div class="branch-divider" data-i18n="guide.flow.step2.or">hoặc</div>
+                            <div class="branch-option">
+                                <div class="branch-label" data-i18n="guide.flow.step2.method3">Cách 3: Tích hợp API nhà cung cấp</div>
+                                <ul>
+                                    <li data-i18n="guide.flow.step2.method3.item1">Thêm node cho giao thức tương ứng trong "Nhóm nhà cung cấp"</li>
+                                    <li data-i18n="guide.flow.step2.method3.item2">Nhập API Key và Endpoint (Base URL)</li>
+                                    <li data-i18n="guide.flow.step2.method3.item3">Không cần tạo/tải file xác thực OAuth</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flow-arrow">→</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4 data-i18n="guide.flow.step3.title">Quản lý xác thực</h4>
+                        <p data-i18n="guide.flow.step3.desc">Xem và quản lý xác thực trong "File xác thực" (Bỏ qua với nhà cung cấp không OAuth)</p>
+                        <ul>
+                            <li data-i18n="guide.flow.step3.item1">Xem file xác thực đã tạo</li>
+                            <li data-i18n="guide.flow.step3.item2">Tự động liên kết với provider pool</li>
+                            <li data-i18n="guide.flow.step3.item3">Xóa xác thực không hợp lệ</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="flow-arrow">→</div>
+                
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4 data-i18n="guide.flow.step4.title">Bắt đầu sử dụng</h4>
+                        <p data-i18n="guide.flow.step4.desc">Xem ví dụ định tuyến trong "Truy cập nhanh" và bắt đầu gọi API</p>
+                        <ul>
+                            <li data-i18n="guide.flow.step4.item1">Xem ví dụ gọi định tuyến</li>
+                            <li data-i18n="guide.flow.step4.item2">Sao chép địa chỉ endpoint API</li>
+                            <li data-i18n="guide.flow.step4.item3">Cấu hình trong ứng dụng client</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 客户端配置指南 -->
+    <div class="guide-panel">
+        <h3><i class="fas fa-desktop"></i> <span data-i18n="guide.client.title">Hướng dẫn cấu hình client</span></h3>
+        <div class="guide-content">
+            <p data-i18n="guide.client.desc">Dưới đây là cách cấu hình cho các client AI phổ biến. Đặt endpoint API thành địa chỉ dịch vụ này:</p>
+            
+            <div class="client-config-list">
+                <div class="client-config-item">
+                    <h4><i class="fas fa-cherry"></i> Cherry Studio</h4>
+                    <div class="config-steps">
+                        <ol>
+                            <li data-i18n="guide.client.cherry.step1">Mở Cài đặt → Model Providers</li>
+                            <li data-i18n="guide.client.cherry.step2">Thêm nhà cung cấp tùy chỉnh</li>
+                            <li data-i18n="guide.client.cherry.step3">Đặt API URL thành: http://localhost:3000/{provider}</li>
+                            <li data-i18n="guide.client.cherry.step4">Nhập API Key (REQUIRED_API_KEY từ cấu hình)</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="client-config-item">
+                    <h4><i class="fas fa-terminal"></i> Cline / Continue</h4>
+                    <div class="config-steps">
+                        <ol>
+                            <li data-i18n="guide.client.cline.step1">Mở Cài đặt VS Code</li>
+                            <li data-i18n="guide.client.cline.step2">Tìm cấu hình Cline hoặc Continue</li>
+                            <li data-i18n="guide.client.cline.step3">Đặt API Base URL thành: http://localhost:3000/{provider}/v1</li>
+                            <li data-i18n="guide.client.cline.step4">Nhập API Key và tên model</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="client-config-item">
+                    <h4><i class="fas fa-code"></i> Gọi cURL chung</h4>
+                    <div class="config-steps">
+                        <pre><code>curl http://localhost:3000/{provider}/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "ten-model",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 1000
+  }'</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="guide-note">
+                <i class="fas fa-lightbulb"></i>
+                <span data-i18n="guide.client.note">Mẹo: Thay {provider} bằng đường dẫn nhà cung cấp thực tế, như gemini-cli-oauth, claude-kiro-oauth, v.v. Xem ví dụ định tuyến trên trang "Truy cập nhanh" để biết đường dẫn đầy đủ.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 常见问题 -->
+    <div class="guide-panel">
+        <h3><i class="fas fa-question-circle"></i> <span data-i18n="guide.faq.title">Câu hỏi thường gặp</span></h3>
+        <div class="guide-content">
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q1">H: Làm gì khi request trả về lỗi 404?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a1">Đ: Kiểm tra đường dẫn API có đúng không. Một số client tự nối thêm đường dẫn vào Base URL, gây trùng lặp. Kiểm tra URL request thực tế trong console và loại bỏ phần đường dẫn thừa.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q2">H: Làm gì khi request trả về lỗi 429?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a2">Đ: 429 nghĩa là tốc độ request quá cao. Cấu hình nhiều tài khoản trong provider pool với luân phiên; hoặc cấu hình chuỗi Fallback để hạ cấp đa loại.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q3">H: Làm gì khi ủy quyền OAuth thất bại?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a3">Đ: Đảm bảo cổng callback OAuth có thể truy cập (Gemini: 8085, Antigravity: 8086, Kiro: 19876-19880). Người dùng Docker cần ánh xạ đúng các cổng này.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q5">H: Làm gì khi phản hồi streaming bị gián đoạn?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a5">Đ: Kiểm tra ổn định mạng, tăng timeout request của client. Nếu dùng proxy, đảm bảo proxy hỗ trợ kết nối dài.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q6">H: Làm gì khi request trả về lỗi "No available and healthy providers"?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a6">Đ: Nghĩa là tất cả nhà cung cấp loại tương ứng không khả dụng. Kiểm tra trạng thái sức khỏe nhà cung cấp trên trang "Nhóm nhà cung cấp", xác nhận xác thực OAuth chưa hết hạn, hoặc cấu hình chuỗi Fallback để tự chuyển sang nhà cung cấp dự phòng.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q7">H: Làm gì khi request trả về lỗi 403 Forbidden?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a7">Đ: 403 nghĩa là truy cập bị từ chối. Trước tiên kiểm tra trạng thái node trên trang "Nhóm nhà cung cấp". Nếu kiểm tra sức khỏe node bình thường, bạn có thể bỏ qua lỗi này. Nguyên nhân khác có thể gồm: quyền tài khoản không đủ, quyền API Key bị giới hạn, hạn chế truy cập theo vùng, xác thực hết hạn, v.v.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q8">H: Tại sao nên bật "Tự động làm mới OAuth Token"?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a8">Đ: OAuth token thường có thời hạn (vd.: 1 giờ). Khi bật, hệ thống tự làm mới token nền, đảm bảo dịch vụ ổn định 24/7 và tránh request thất bại do token hết hạn.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" data-i18n="guide.faq.q9">H: Không bật "Nhà cung cấp model tải sẵn" ảnh hưởng gì đến bảo trì token?</div>
+                    <div class="faq-answer" data-i18n="guide.faq.a9">Đ: Hệ thống chỉ tự làm mới cho nhà cung cấp đã khởi tạo trước. Nếu nhà cung cấp chưa được khởi tạo trước, token sẽ không được tự làm mới nền, có thể dẫn đến hết hạn nếu lâu không dùng. Khuyến nghị thêm nhà cung cấp thường dùng vào danh sách khởi tạo trước.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

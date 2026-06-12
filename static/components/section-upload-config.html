@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="components/section-upload-config.css">
+<!-- Upload Configuration Section -->
+<section id="upload-config" class="section" aria-labelledby="upload-config-title">
+    <h2 id="upload-config-title" data-i18n="upload.title">Quản lý file xác thực</h2>
+    <div class="upload-config-panel">
+        <!-- 搜索和过滤区域 -->
+        <div class="config-search-panel">
+            <div class="search-controls">
+                <div class="form-group">
+                    <label for="configSearch" data-i18n="upload.search">Tìm cấu hình</label>
+                    <div class="search-input-group">
+                        <input type="text" id="configSearch" class="form-control" data-i18n-placeholder="upload.searchPlaceholder" placeholder="Nhập tên file">
+                        <button type="button" class="btn btn-outline" id="searchConfigBtn" data-i18n-title="common.search" data-i18n-aria-label="common.search" aria-label="Tìm kiếm">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="configProviderFilter" data-i18n="upload.providerFilter">Loại nhà cung cấp</label>
+                    <select id="configProviderFilter" class="form-control">
+                        <option value="" data-i18n="upload.providerFilter.all">Tất cả nhà cung cấp</option>
+                        <!-- 选项将由 provider-manager.js 动态填充 -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="configStatusFilter" data-i18n="upload.statusFilter">Trạng thái liên kết</label>
+                    <select id="configStatusFilter" class="form-control">
+                        <option value="" data-i18n="upload.statusFilter.all">Tất cả trạng thái</option>
+                        <option value="used" data-i18n="upload.statusFilter.used">Đã liên kết</option>
+                        <option value="unused" data-i18n="upload.statusFilter.unused">Chưa liên kết</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配置列表 -->
+        <div class="config-list-container">
+            <div class="config-list-header">
+                <h3 data-i18n="upload.listTitle">Danh sách file cấu hình</h3>
+                <div class="config-stats">
+                    <span id="configCount" data-i18n="upload.count" data-i18n-params='{"count":"0"}'>Tổng {count} file cấu hình</span>
+                    <span id="usedConfigCount" class="status-used" data-i18n="upload.usedCount" data-i18n-params='{"count":"0"}'>Đã liên kết: {count}</span>
+                    <span id="unusedConfigCount" class="status-unused" data-i18n="upload.unusedCount" data-i18n-params='{"count":"0"}'>Chưa liên kết: {count}</span>
+                    <button id="batchLinkKiroBtn" class="btn-batch-link" data-i18n-title="upload.batchLink" title="Tự động liên kết OAuth">
+                        <i class="fas fa-link"></i> <span data-i18n="upload.batchLink">Tự động liên kết OAuth</span>
+                    </button>
+                    <button id="deleteUnboundBtn" class="btn-delete-unbound" data-i18n-title="upload.deleteUnbound" title="Xóa chưa liên kết">
+                        <i class="fas fa-trash-alt"></i> <span data-i18n="upload.deleteUnbound">Xóa chưa liên kết</span>
+                    </button>
+                    <button class="btn-refresh" id="refreshConfigList" aria-label="Refresh Config List" data-i18n-aria-label="upload.refresh">
+                        <i class="fas fa-sync-alt"></i> <span data-i18n="upload.refresh">Làm mới</span>
+                    </button>
+                    <button class="btn-download" id="downloadAllConfigs" aria-label="Download All Configs" data-i18n-aria-label="upload.downloadAll">
+                        <i class="fas fa-file-archive"></i> <span data-i18n="upload.downloadAll">Tải tất cả (ZIP)</span>
+                    </button>
+                </div>
+            </div>
+            <div id="configList" class="config-list">
+                <!-- 配置文件列表将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+</section>

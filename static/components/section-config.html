@@ -1,0 +1,482 @@
+<link rel="stylesheet" href="components/section-config.css">
+<!-- Configuration Section -->
+<section id="config" class="section" aria-labelledby="config-title">
+    <h2 id="config-title" data-i18n="config.title">Quản lý cấu hình</h2>
+    <div class="config-handoff-panel">
+        <div class="config-handoff-head">
+            <div>
+                <h3 data-i18n="config.handoff.title">Bàn giao bên ngoài</h3>
+                <p class="config-handoff-subtitle" data-i18n="config.handoff.subtitle">Hoàn tất API Key công khai và nhà cung cấp tải sẵn tại đây, rồi chuyển sang Truy cập nhanh để sao chép đoạn cấu hình cho client.</p>
+            </div>
+            <div class="config-handoff-actions">
+                <button type="button" class="btn btn-outline" id="configOpenQuickAccess">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span data-i18n="config.handoff.openAccess">Mở Truy cập nhanh</span>
+                </button>
+                <button type="button" class="btn btn-primary" id="configSaveAndAccess">
+                    <i class="fas fa-paper-plane"></i>
+                    <span data-i18n="config.handoff.saveAndAccess">Lưu & Mở Truy cập nhanh</span>
+                </button>
+            </div>
+        </div>
+        <div class="config-handoff-grid">
+            <div class="config-handoff-item">
+                <span class="config-handoff-label" data-i18n="config.handoff.password">Mật khẩu quản trị</span>
+                <div class="config-handoff-password-container">
+                    <strong id="configHandoffPasswordStatus">--</strong>
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="configHandoffChangePwdBtn">
+                        <i class="fas fa-key"></i>
+                        <span data-i18n="config.handoff.changePassword">Đổi mật khẩu</span>
+                    </button>
+                </div>
+            </div>
+            <div class="config-handoff-item">
+                <span class="config-handoff-label" data-i18n="config.handoff.key">API Key công khai</span>
+                <strong id="configHandoffKeyStatus">--</strong>
+            </div>
+            <div class="config-handoff-item">
+                <span class="config-handoff-label" data-i18n="config.handoff.providers">Nhà cung cấp tải sẵn</span>
+                <strong id="configHandoffProviders">--</strong>
+            </div>
+            <div class="config-handoff-item">
+                <span class="config-handoff-label" data-i18n="config.handoff.nextStep">Bước tiếp theo</span>
+                <strong data-i18n="config.handoff.nextStepValue">Mở Truy cập nhanh và sao chép đoạn cấu hình sẵn có</strong>
+            </div>
+        </div>
+    </div>
+    <div class="config-panel">
+        <div class="config-form">
+            <!-- 基础设置 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.basic.title">Cài đặt cơ bản</h3>
+                <div class="form-group password-input-group">
+                    <label for="apiKey" data-i18n="config.apiKey">API Key</label>
+                    <div class="password-input-wrapper">
+                        <div class="input-with-toggle">
+                            <input type="password" id="apiKey" class="form-control" data-i18n-placeholder="config.apiKeyPlaceholder" placeholder="Vui lòng nhập API Key" autocomplete="off">
+                            <button type="button" class="password-toggle" data-target="apiKey" aria-label="Hiện/ẩn mật khẩu">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-secondary generate-key-btn" id="generateApiKey" data-i18n-title="config.apiKey.generateTitle" title="Tự động tạo API Key">
+                            <i class="fas fa-magic"></i> <span data-i18n="config.apiKey.generate">Tạo</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="host" data-i18n="config.host">Địa chỉ lắng nghe</label>
+                        <input type="text" id="host" class="form-control" value="127.0.0.1" data-i18n-placeholder="config.hostPlaceholder" placeholder="vd.: 127.0.0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="port" data-i18n="config.port">Cổng</label>
+                        <input type="number" id="port" class="form-control" value="3000" data-i18n-placeholder="config.portPlaceholder" placeholder="3000">
+                    </div>
+                </div>
+                <div class="form-group pool-section">
+                    <label data-i18n="config.modelProvider">Nhà cung cấp khởi tạo trước</label>
+                    <div id="modelProvider" class="provider-tags">
+                        <button type="button" class="provider-tag" data-value="gemini-cli-oauth">
+                            <i class="fas fa-robot"></i>
+                            <span data-i18n="dashboard.routing.nodeName.gemini">Gemini CLI OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="gemini-antigravity">
+                            <i class="fas fa-rocket"></i>
+                            <span data-i18n="dashboard.routing.nodeName.antigravity">Gemini Antigravity</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="openai-custom">
+                            <i class="fas fa-brain"></i>
+                            <span data-i18n="dashboard.routing.nodeName.openai">OpenAI Custom</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="claude-custom">
+                            <i class="fas fa-comment-dots"></i>
+                            <span data-i18n="dashboard.routing.nodeName.claude">Claude Custom</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="claude-kiro-oauth">
+                            <i class="fas fa-key"></i>
+                            <span data-i18n="dashboard.routing.nodeName.kiro">Claude Kiro OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="openai-qwen-oauth">
+                            <i class="fas fa-cloud"></i>
+                            <span data-i18n="dashboard.routing.nodeName.qwen">Qwen OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="openaiResponses-custom">
+                            <i class="fas fa-reply"></i>
+                            <span>OpenAI Responses</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="atlascloud">
+                            <i class="fas fa-cloud"></i>
+                            <span data-i18n="dashboard.routing.nodeName.atlascloud">AtlasCloud</span>
+                        </button>
+
+                        <button type="button" class="provider-tag" data-value="openai-codex-oauth">
+                            <i class="fas fa-code"></i>
+                            <span data-i18n="dashboard.routing.nodeName.codex">OpenAI Codex OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="grok-cli-oauth">
+                            <i class="fas fa-terminal"></i>
+                            <span data-i18n="dashboard.routing.nodeName.grokCli">Grok CLI</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="grok-web">
+                            <i class="fas fa-search"></i>
+                            <span data-i18n="dashboard.routing.nodeName.grok">Grok Web</span>
+                        </button>
+                    </div>
+                    <small class="form-text" data-i18n="config.modelProviderHelp">Chọn adapter nhà cung cấp để khởi tạo trước khi khởi động nhằm tăng tốc request đầu tiên và khả dụng định tuyến (phải chọn ít nhất một)</small>
+                </div>
+            </div>
+
+            <!-- 代理与网络 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.proxy.title">Cài đặt proxy</h3>
+                <div class="form-group">
+                    <label for="proxyUrl" data-i18n="config.proxy.url">Proxy URL</label>
+                    <input type="text" id="proxyUrl" class="form-control" data-i18n-placeholder="config.proxy.urlPlaceholder" placeholder="vd.: http://127.0.0.1:7890 hoặc socks5://127.0.0.1:1080">
+                    <small class="form-text" data-i18n="config.proxy.urlNote">Hỗ trợ proxy HTTP, HTTPS và SOCKS5. Để trống để tắt proxy</small>
+                </div>
+                <div class="form-group pool-section">
+                    <label data-i18n="config.proxy.enabledProviders">Nhà cung cấp dùng proxy</label>
+                    <div id="proxyProviders" class="provider-tags">
+                        <button type="button" class="provider-tag" data-value="gemini-cli-oauth">
+                            <i class="fas fa-robot"></i>
+                            <span>Gemini CLI OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="gemini-antigravity">
+                            <i class="fas fa-rocket"></i>
+                            <span>Gemini Antigravity</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="openai-custom">
+                            <i class="fas fa-brain"></i>
+                            <span>OpenAI Custom</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="claude-custom">
+                            <i class="fas fa-comment-dots"></i>
+                            <span>Claude Custom</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="claude-kiro-oauth">
+                            <i class="fas fa-key"></i>
+                            <span>Claude Kiro OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="openai-qwen-oauth">
+                            <i class="fas fa-cloud"></i>
+                            <span>Qwen OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="openaiResponses-custom">
+                            <i class="fas fa-reply"></i>
+                            <span>OpenAI Responses</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="atlascloud">
+                            <i class="fas fa-cloud"></i>
+                            <span data-i18n="dashboard.routing.nodeName.atlascloud">AtlasCloud</span>
+                        </button>
+
+                        <button type="button" class="provider-tag" data-value="openai-codex-oauth">
+                            <i class="fas fa-code"></i>
+                            <span>OpenAI Codex OAuth</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="grok-cli-oauth">
+                            <i class="fas fa-terminal"></i>
+                            <span data-i18n="dashboard.routing.nodeName.grokCli">Grok CLI</span>
+                        </button>
+                        <button type="button" class="provider-tag" data-value="grok-web">
+                            <i class="fas fa-search"></i>
+                            <span>Grok Web</span>
+                        </button>
+                    </div>
+                    <small class="form-text" data-i18n="config.proxy.enabledProvidersNote">Chọn nhà cung cấp sẽ dùng proxy. Nhà cung cấp không chọn sẽ kết nối trực tiếp</small>
+                </div>
+                <hr>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label data-i18n="config.proxy.tlsSidecarEnabled">Giả mạo dấu vết TLS (uTLS Sidecar)</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="tlsSidecarEnabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="tlsSidecarPort" data-i18n="config.proxy.tlsSidecarPort">Cổng Sidecar</label>
+                        <input type="number" id="tlsSidecarPort" class="form-control" min="1024" max="65535" value="9090">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tlsSidecarProxyUrl" data-i18n="config.proxy.tlsSidecarProxyUrl">Proxy upstream Sidecar</label>
+                    <input type="text" id="tlsSidecarProxyUrl" class="form-control" data-i18n-placeholder="config.proxy.urlPlaceholder" placeholder="vd.: http://127.0.0.1:7890 hoặc socks5://127.0.0.1:1080">
+                    <small class="form-text" data-i18n="config.proxy.urlNote">Hỗ trợ proxy HTTP, HTTPS và SOCKS5. Để trống để tắt proxy</small>
+                </div>
+                <div class="form-group pool-section">
+                    <label data-i18n="config.proxy.tlsSidecarEnabledProviders">Nhà cung cấp dùng TLS Sidecar</label>
+                    <div id="tlsSidecarProviders" class="provider-tags">
+                        <!-- 动态渲染 -->
+                    </div>
+                    <small class="form-text" data-i18n="config.proxy.enabledProvidersNote">Chọn nhà cung cấp sẽ dùng proxy. Nhà cung cấp không chọn sẽ kết nối trực tiếp</small>
+                </div>
+                <small class="form-text" data-i18n="config.proxy.tlsSidecarNote">Khi bật, request của nhà cung cấp đã chọn được định tuyến qua Go uTLS sidecar để có dấu vết TLS/H2 Chrome hoàn hảo, vượt Cloudflare (cần khởi động lại)</small>
+            </div>
+
+            <!-- 服务治理与高可用 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.governance.title">Quản trị dịch vụ</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="requestMaxRetries" data-i18n="config.advanced.maxRetries">Số lần thử lại tối đa của nhà cung cấp</label>
+                        <input type="number" id="requestMaxRetries" class="form-control" min="0" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="requestBaseDelay" data-i18n="config.advanced.baseDelay">Độ trễ thử lại cơ bản (ms)</label>
+                        <input type="number" id="requestBaseDelay" class="form-control" min="0" step="100" value="1000">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="credentialSwitchMaxRetries" data-i18n="config.advanced.credentialSwitchMaxRetries">Số lần thử chuyển xác thực tối đa</label>
+                        <input type="number" id="credentialSwitchMaxRetries" class="form-control" min="1" max="50" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxErrorCount" data-i18n="config.advanced.maxErrorCount">Số lỗi tối đa của nhà cung cấp</label>
+                        <input type="number" id="maxErrorCount" class="form-control" value="10" min="1" max="20">
+                    </div>
+                </div>
+
+                <hr>
+                <div class="config-inline-heading">
+                    <span data-i18n="config.advanced.rateLimitCooldownTitle">Bảo vệ giới hạn tốc độ 429</span>
+                    <small data-i18n="config.advanced.rateLimitCooldownNote">Khi upstream trả về 429, tạm thời loại tài khoản hiện tại khỏi pool và tự động phục hồi.</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="config.advanced.rateLimitCooldownEnabled">Bật cooldown 429</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="rateLimitCooldownEnabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="rateLimitCooldownMs" data-i18n="config.advanced.rateLimitCooldownMs">Cooldown mặc định (ms)</label>
+                        <input type="number" id="rateLimitCooldownMs" class="form-control" min="0" step="1000" value="30000">
+                    </div>
+                </div>
+                <hr>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="warmupTarget" data-i18n="config.advanced.warmupTarget">Số node làm mới khi khởi động</label>
+                        <input type="number" id="warmupTarget" class="form-control" min="0" max="100" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="refreshConcurrencyPerProvider" data-i18n="config.advanced.refreshConcurrencyPerProvider">Đồng thời làm mới mỗi nhà cung cấp</label>
+                        <input type="number" id="refreshConcurrencyPerProvider" class="form-control" min="1" max="10" value="1">
+                    </div>
+                </div>
+                <div class="form-group pool-section">
+                    <label for="providerFallbackChain" data-i18n="config.advanced.fallbackChain">Cấu hình chuỗi Fallback đa loại</label>
+                    <textarea id="providerFallbackChain" class="form-control" rows="4" data-i18n-placeholder="config.advanced.fallbackChainPlaceholder"></textarea>
+                </div>
+                <div class="form-group pool-section">
+                    <label for="modelFallbackMapping" data-i18n="config.advanced.modelFallbackMapping">Ánh xạ Fallback model đa giao thức</label>
+                    <textarea id="modelFallbackMapping" class="form-control" rows="4" data-i18n-placeholder="config.advanced.modelFallbackMappingPlaceholder"></textarea>
+                </div>
+            </div>
+
+            <!-- OAuth 与令牌 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.oauth.title">OAuth & Token</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label for="cronNearMinutes" data-i18n="config.advanced.cronInterval">Chu kỳ làm mới OAuth Token (phút)</label>
+                        <input type="number" id="cronNearMinutes" class="form-control" min="1" max="60" value="1">
+                    </div>
+                     <div class="form-group">
+                        <label data-i18n="config.advanced.cronEnabled">Bật tự động làm mới OAuth Token (cần khởi động lại)</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="cronRefreshToken">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="loginExpiry" data-i18n="config.advanced.loginExpiry">Thời hạn đăng nhập (giây)</label>
+                    <input type="number" id="loginExpiry" class="form-control" min="60" value="3600">
+                    <small class="form-text" data-i18n="config.advanced.loginExpiryNote">Thời hạn token sau khi đăng nhập bảng điều khiển, mặc định 3600 giây (1 giờ)</small>
+                </div>
+            </div>
+
+            <!-- 定时健康检查 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.healthCheck.title">Kiểm tra sức khỏe theo lịch</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <span class="toggle-label" data-i18n="config.healthCheck.enabled">Bật kiểm tra theo lịch</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="scheduledHealthCheckEnabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <span class="toggle-label" data-i18n="config.healthCheck.startupRun">Chạy khi khởi động</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="scheduledHealthCheckStartupRun">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="scheduledHealthCheckInterval" data-i18n="config.healthCheck.interval">Chu kỳ kiểm tra</label>
+                    <div class="input-with-quick-select">
+                        <input type="number" id="scheduledHealthCheckInterval" class="form-control" min="60000" max="3600000" step="60000" value="600000" data-i18n-placeholder="config.healthCheck.msPlaceholder" placeholder="mili giây">
+                        <div class="quick-select-btns">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-value="300000" data-i18n="config.healthCheck.5min">5 phút</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-value="600000" data-i18n="config.healthCheck.10min">10 phút</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-value="1800000" data-i18n="config.healthCheck.30min">30 phút</button>
+                        </div>
+                    </div>
+                    <small class="form-text" data-i18n="config.healthCheck.intervalNote">Tính bằng mili giây. Tối thiểu 60000ms (1 phút), tối đa 3600000ms (1 giờ). Nhập thủ công hoặc dùng nút chọn nhanh</small>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="config.healthCheck.providerTypes">Nhà cung cấp cần kiểm tra</label>
+                    <div id="scheduledHealthCheckProviders" class="provider-tags">
+                        <!-- 由 config-manager.js updateConfigProviderConfigs 动态渲染，勿在此处硬编码 -->
+                    </div>
+                    <small class="form-text" data-i18n="config.healthCheck.providerTypesNote">Chọn loại nhà cung cấp cho kiểm tra sức khỏe theo lịch. Để trống để bỏ qua tất cả kiểm tra</small>
+                </div>
+            </div>
+
+            <!-- 日志管理 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.log.title">Cài đặt nhật ký</h3>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label data-i18n="config.log.enabled">Bật ghi nhật ký</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="logEnabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="logOutputMode" data-i18n="config.log.outputMode">Chế độ xuất nhật ký</label>
+                        <select id="logOutputMode" class="form-control">
+                            <option value="all" selected data-i18n="config.log.outputMode.all">Tất cả (Console + File)</option>
+                            <option value="console" data-i18n="config.log.outputMode.console">Chỉ Console</option>
+                            <option value="file" data-i18n="config.log.outputMode.file">Chỉ File</option>
+                            <option value="none" data-i18n="config.log.outputMode.none">Tắt</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="logLevel" data-i18n="config.log.level">Mức nhật ký</label>
+                        <select id="logLevel" class="form-control">
+                            <option value="debug" data-i18n="config.log.level.debug">Debug</option>
+                            <option value="info" selected data-i18n="config.log.level.info">Info</option>
+                            <option value="warn" data-i18n="config.log.level.warn">Cảnh báo</option>
+                            <option value="error" data-i18n="config.log.level.error">Lỗi</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="logDir" data-i18n="config.log.dir">Thư mục nhật ký</label>
+                        <input type="text" id="logDir" class="form-control" value="logs">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="logMaxFileSize" data-i18n="config.log.maxFileSize">Kích thước file tối đa (byte)</label>
+                        <input type="number" id="logMaxFileSize" class="form-control" value="10485760" step="1048576">
+                    </div>
+                    <div class="form-group">
+                        <label for="logMaxFiles" data-i18n="config.log.maxFiles">Số file giữ lại tối đa</label>
+                        <input type="number" id="logMaxFiles" class="form-control" value="10" min="1">
+                    </div>
+                </div>
+                <div class="config-row">
+                    <div class="form-group">
+                        <label data-i18n="config.log.includeRequestId">Bao gồm Request ID</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="logIncludeRequestId" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="config.log.includeTimestamp">Bao gồm dấu thời gian</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="logIncludeTimestamp" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="promptLogMode" data-i18n="config.advanced.promptLogMode">Chế độ nhật ký Prompt</label>
+                        <select id="promptLogMode" class="form-control">
+                            <option value="none" data-i18n="config.advanced.promptLogMode.none">Không</option>
+                            <option value="console" data-i18n="config.advanced.promptLogMode.console">Console</option>
+                            <option value="file" data-i18n="config.advanced.promptLogMode.file">File</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="promptLogBaseName" data-i18n="config.advanced.promptLogBaseName">Tên cơ sở nhật ký Prompt</label>
+                        <input type="text" id="promptLogBaseName" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统与高级 -->
+            <div class="config-group-section">
+                <h3 data-i18n="config.advanced.title">Cấu hình nâng cao</h3>
+                <div class="form-group">
+                    <label for="providerPoolsFilePath" data-i18n="config.advanced.poolFilePath">Đường dẫn file cấu hình Provider Pool (bắt buộc)</label>
+                    <input type="text" id="providerPoolsFilePath" class="form-control">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="systemPromptFilePath" data-i18n="config.advanced.systemPromptFile">Đường dẫn file System Prompt</label>
+                        <input type="text" id="systemPromptFilePath" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="systemPromptMode" data-i18n="config.advanced.systemPromptMode">Chế độ System Prompt</label>
+                        <select id="systemPromptMode" class="form-control">
+                            <option value="append" selected data-i18n="config.advanced.systemPromptMode.append">Nối thêm</option>
+                            <option value="overwrite" data-i18n="config.advanced.systemPromptMode.overwrite">Ghi đè</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="systemPrompt" data-i18n="config.advanced.systemPrompt">System Prompt</label>
+                    <textarea id="systemPrompt" class="form-control" rows="4"></textarea>
+                </div>
+                <!-- 系统提示词替换规则 -->
+                <div class="form-group">
+                    <label data-i18n="config.advanced.systemPromptReplacements">Thay thế System Prompt</label>
+                    <div id="systemPromptReplacementsContainer" class="replacements-container">
+                        <!-- 动态添加替换规则行 -->
+                    </div>
+                    <button type="button" id="addReplacementBtn" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-plus"></i> <span data-i18n="config.advanced.replacement.add">Thêm quy tắc</span>
+                    </button>
+                    <small class="form-text" data-i18n="config.advanced.systemPromptReplacementsNote">Thực hiện thay thế nội dung tuần tự cho system prompt (từ request và file).</small>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword" data-i18n="config.advanced.adminPassword">Mật khẩu quản trị</label>
+                    <div class="password-input-wrapper">
+                        <div class="input-with-toggle">
+                            <input type="password" id="adminPassword" class="form-control" autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-target="adminPassword" aria-label="Hiện/ẩn mật khẩu">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <small class="form-text" data-i18n="config.advanced.adminPasswordNote">Mật khẩu phải có ít nhất 12 ký tự, và bạn cần đăng nhập lại sau khi đổi.</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-success" id="saveConfig">
+                    <i class="fas fa-save"></i> <span data-i18n="config.save">Lưu cấu hình</span>
+                </button>
+                <button class="btn btn-secondary" id="resetConfig">
+                    <i class="fas fa-undo"></i> <span data-i18n="config.reset">Đặt lại</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,23 @@
+<!-- Header -->
+<link rel="stylesheet" href="components/header.css">
+<header class="header">
+    <div class="header-content">
+        <h1><img src="https://src.hex2077.dev/logo/favicon.ico" class="header-logo" alt="Logo"> <span class="header-title" data-i18n="header.title">AIGate</span></h1>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu" data-i18n-aria-label="header.menu" data-i18n-title="header.menu" title="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-controls" id="headerControls">
+            <span class="status-badge" id="serverStatus">
+                <i class="fas fa-circle"></i> <span class="status-text" data-i18n="header.status.connecting">Đang kết nối...</span>
+            </span>
+            <button id="themeToggleBtn" class="theme-toggle" aria-label="Toggle Theme" data-i18n-aria-label="header.themeToggle" data-i18n-title="header.themeToggle" title="Chuyển giao diện">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+            </button>
+            <button id="logoutBtn" class="logout-btn" data-i18n="header.logout" title="Logout" data-i18n-title="header.logout">Đăng xuất</button>
+            <button id="restartBtn" class="logout-btn" aria-label="Restart Service" data-i18n-aria-label="header.restart">
+                <i id="restartBtnIcon" class="fas fa-redo"></i> <span id="restartBtnText" class="btn-text" data-i18n="header.restart">Khởi động lại</span>
+            </button>
+        </div>
+    </div>
+</header>
