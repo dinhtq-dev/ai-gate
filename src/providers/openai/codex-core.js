@@ -34,6 +34,7 @@ export class CodexApiService {
         this.last_refresh = null;
         this.credsPath = null; // 记录本次加载/使用的凭据文件路径，确保刷新后写回同一文件
         this.accessTokenOnlyRefreshLogged = false;
+        this._credsFileMtime = null;
         this.uuid = config.uuid; // 保存 uuid 用于号池管理
         this.isInitialized = false;
 
@@ -116,8 +117,68 @@ export class CodexApiService {
 
             this.isInitialized = true;
             logger.info(`[Codex] Initialized with account: ${this.email}`);
+            await this._trackCredentialsFileMtime(credsPath);
         } catch (error) {
             logger.warn(`[Codex Auth] Failed to load credentials: ${error.message}`);
+        }
+    }
+
+    async _resolveCredentialsPath() {
+        if (this.credsPath) {
+            return this.credsPath;
+        }
+        if (this.config.CODEX_OAUTH_CREDS_FILE_PATH) {
+            return this.config.CODEX_OAUTH_CREDS_FILE_PATH;
+        }
+        return null;
+    }
+
+    async _trackCredentialsFileMtime(credsPath) {
+        try {
+            const absPath = path.isAbsolute(credsPath) ? credsPath : path.join(process.cwd(), credsPath);
+            const stat = await fs.stat(absPath);
+            this._credsFileMtime = stat.mtimeMs;
+        } catch {
+            this._credsFileMtime = null;
+        }
+    }
+
+    async ensureCredentialsFresh() {
+        const credPath = await this._resolveCredentialsPath();
+        if (!credPath) {
+            if (!this.isInitialized) {
+                await this.initialize();
+            }
+            return;
+        }
+
+        try {
+            const absPath = path.isAbsolute(credPath) ? credPath : path.join(process.cwd(), credPath);
+            const stat = await fs.stat(absPath);
+            if (!this.isInitialized || this._credsFileMtime !== stat.mtimeMs) {
+                this.isInitialized = false;
+                this.config.CODEX_OAUTH_CREDS_FILE_PATH = credPath;
+                await this.loadCredentials();
+            }
+        } catch (error) {
+            if (!this.isInitialized) {
+                await this.initialize();
+            } else {
+                logger.warn(`[Codex Auth] Failed to refresh credentials from disk: ${error.message}`);
+            }
+        }
+    }
+
+    _logUnauthorizedHint() {
+        try {
+            const payload = JSON.parse(Buffer.from(String(this.accessToken || '').split('.')[1] || '', 'base64url').toString('utf8'));
+            const authClaims = payload?.['https://api.openai.com/auth'] || {};
+            const planType = authClaims.chatgpt_plan_type || authClaims.plan_type;
+            if (planType === 'free') {
+                logger.warn('[Codex] Account plan is free. Codex API usually requires ChatGPT Plus/Pro/Team — 401 is expected on free accounts.');
+            }
+        } catch {
+            // ignore JWT parse errors
         }
     }
 
@@ -178,9 +239,7 @@ export class CodexApiService {
      * 生成内容（非流式）
      */
     async generateContent(model, requestBody) {
-        if (!this.isInitialized) {
-            await this.initialize();
-        }
+        await this.ensureCredentialsFresh();
 
         let selectedModel = model;
         if (!CODEX_MODELS.includes(model)) {
@@ -228,6 +287,7 @@ export class CodexApiService {
         } catch (error) {
             if (error.response?.status === 401) {
                 logger.info('[Codex] Received 401. Triggering background refresh...');
+                this._logUnauthorizedHint();
                 await normalizeProviderErrorMessage(error, { status: 401, context: 'non-stream' });
 
                 // 触发后台异步刷新
@@ -252,9 +312,7 @@ export class CodexApiService {
      * 流式生成内容
      */
     async* generateContentStream(model, requestBody) {
-        if (!this.isInitialized) {
-            await this.initialize();
-        }
+        await this.ensureCredentialsFresh();
 
         let selectedModel = model;
         if (!CODEX_MODELS.includes(model)) {
@@ -302,6 +360,7 @@ export class CodexApiService {
         } catch (error) {
             if (error.response?.status === 401) {
                 logger.info('[Codex] Received 401 during stream. Triggering background refresh...');
+                this._logUnauthorizedHint();
                 await normalizeProviderErrorMessage(error, { status: 401, context: 'stream' });
 
                 // 触发后台异步刷新

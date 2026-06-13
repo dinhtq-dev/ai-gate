@@ -260,8 +260,14 @@
     letter-spacing: 0.05em;
 }
 
-.instance-provider-type i {
+.instance-provider-type i,
+.instance-provider-type .provider-icon-chip__svg {
     color: var(--provider-theme, var(--primary-color));
+}
+
+.instance-provider-type .provider-icon-chip__svg {
+    width: 0.85rem;
+    height: 0.85rem;
 }
 
 .instance-name {

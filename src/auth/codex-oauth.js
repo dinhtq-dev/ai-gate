@@ -6,7 +6,8 @@ import crypto from 'crypto';
 import open from 'open';
 import axios from 'axios';
 import { broadcastEvent } from '../services/ui-manager.js';
-import { autoLinkProviderConfigs } from '../services/service-manager.js';
+import { autoLinkProviderConfigs, syncProviderCredPathByAccount } from '../services/service-manager.js';
+import { invalidateProviderServiceAdapters } from '../providers/adapter.js';
 import { CONFIG } from '../core/config-manager.js';
 import { getProxyConfigForProvider } from '../utils/proxy-utils.js';
 import { preprocessCodexImportPayload } from './codex-import-normalizer.js';
@@ -28,6 +29,18 @@ const CODEX_OAUTH_CONFIG = {
  * 活动的服务器实例管理（与 gemini-oauth 一致）
  */
 const activeServers = new Map();
+
+async function notifyCodexCredentialsChanged({ relativePath, email, accountId, overwritten = false } = {}) {
+    invalidateProviderServiceAdapters('openai-codex-oauth');
+    if (!overwritten && relativePath) {
+        await syncProviderCredPathByAccount(
+            'openai-codex-oauth',
+            'CODEX_OAUTH_CREDS_FILE_PATH',
+            relativePath,
+            { email, accountId }
+        );
+    }
+}
 
 function sanitizeCodexCredentialFilenamePart(value) {
     const sanitized = String(value || 'default')
@@ -194,6 +207,12 @@ class CodexAuth {
         logger.info(`${CODEX_OAUTH_CONFIG.logPrefix} Email: ${credentials.email}`);
         logger.info(`${CODEX_OAUTH_CONFIG.logPrefix} Account ID: ${credentials.account_id}`);
 
+        await notifyCodexCredentialsChanged({
+            relativePath,
+            email: credentials.email,
+            accountId: credentials.account_id
+        });
+
         // 关闭服务器
         if (this.server) {
             this.server.close();
@@ -263,7 +282,12 @@ class CodexAuth {
             expired: new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString()
         };
 
-        await this.saveCredentials(credentials);
+        const saveResult = await this.saveCredentials(credentials);
+        await notifyCodexCredentialsChanged({
+            relativePath: saveResult.relativePath,
+            email: credentials.email,
+            accountId: credentials.account_id
+        });
 
         logger.info(`${CODEX_OAUTH_CONFIG.logPrefix} Authentication successful!`);
         logger.info(`${CODEX_OAUTH_CONFIG.logPrefix} Email: ${credentials.email}`);
@@ -502,13 +526,17 @@ class CodexAuth {
      * @param {Object} creds
      * @returns {Promise<Object>}
      */
-    async saveCredentials(creds) {
+    async saveCredentials(creds, explicitPath = null) {
         const email = creds.email || this.config.CODEX_EMAIL || 'default';
         const safeEmail = sanitizeCodexCredentialFilenamePart(email);
 
         // 优先使用配置中指定的路径，否则保存到 configs/codex 目录
         let credsPath;
-        if (this.config.CODEX_OAUTH_CREDS_FILE_PATH) {
+        if (explicitPath) {
+            credsPath = path.isAbsolute(explicitPath)
+                ? explicitPath
+                : path.join(process.cwd(), explicitPath);
+        } else if (this.config.CODEX_OAUTH_CREDS_FILE_PATH) {
             credsPath = this.config.CODEX_OAUTH_CREDS_FILE_PATH;
         } else {
             // 保存到 configs/codex 目录（与其他供应商一致）
@@ -676,10 +704,16 @@ class CodexAuth {
  * 批量导入 Codex Token 并生成凭据文件（流式版本）
  * @param {Object[]} tokens - Token 对象数组
  * @param {Function} onProgress - 进度回调函数
- * @param {boolean} skipDuplicateCheck - 是否跳过重复检查
+ * @param {boolean|Object} importOptions - skipDuplicateCheck 或 { skipDuplicateCheck, overwriteExisting }
  * @returns {Promise<Object>} 批量处理结果
  */
-export async function batchImportCodexTokensStream(tokens, onProgress = null, skipDuplicateCheck = false) {
+export async function batchImportCodexTokensStream(tokens, onProgress = null, importOptions = false) {
+    const options = typeof importOptions === 'object' && importOptions !== null
+        ? importOptions
+        : { skipDuplicateCheck: !!importOptions };
+    const skipDuplicateCheck = !!options.skipDuplicateCheck;
+    const overwriteExisting = !!options.overwriteExisting;
+
     const auth = new CodexAuth({});
     const results = {
         total: tokens.length,
@@ -735,28 +769,33 @@ export async function batchImportCodexTokensStream(tokens, onProgress = null, sk
 
             const refreshToken = tokenData.refresh_token || '';
 
-            // 检查重复
+            let overwritePath = null;
             if (!skipDuplicateCheck) {
                 const duplicateCheck = await auth.checkDuplicate(accountId, refreshToken, email);
                 if (duplicateCheck.isDuplicate) {
-                    progressData.current = {
-                        index: i + 1,
-                        success: false,
-                        error: 'duplicate',
-                        email,
-                        accountId,
-                        existingPath: duplicateCheck.existingPath
-                    };
-                    results.failed++;
-                    results.details.push(progressData.current);
-                    if (onProgress) {
-                        onProgress({
-                            ...progressData,
-                            successCount: results.success,
-                            failedCount: results.failed
-                        });
+                    const shouldOverwrite = overwriteExisting || !refreshToken;
+                    if (!shouldOverwrite) {
+                        progressData.current = {
+                            index: i + 1,
+                            success: false,
+                            error: 'duplicate',
+                            email,
+                            accountId,
+                            existingPath: duplicateCheck.existingPath,
+                            accessTokenOnly: !refreshToken
+                        };
+                        results.failed++;
+                        results.details.push(progressData.current);
+                        if (onProgress) {
+                            onProgress({
+                                ...progressData,
+                                successCount: results.success,
+                                failedCount: results.failed
+                            });
+                        }
+                        continue;
                     }
-                    continue;
+                    overwritePath = duplicateCheck.existingPath;
                 }
             }
 
@@ -800,11 +839,11 @@ export async function batchImportCodexTokensStream(tokens, onProgress = null, sk
                 access_token_only: !refreshToken
             };
 
-            // 保存凭据
-            const saveResult = await auth.saveCredentials(credentials);
+            // 保存凭据（重复时可覆盖已有文件）
+            const saveResult = await auth.saveCredentials(credentials, overwritePath);
             const relativePath = saveResult.relativePath;
 
-            logger.info(`${CODEX_OAUTH_CONFIG.logPrefix} Token ${i + 1} imported: ${relativePath}`);
+            logger.info(`${CODEX_OAUTH_CONFIG.logPrefix} Token ${i + 1} ${overwritePath ? 'overwritten' : 'imported'}: ${relativePath}`);
 
             progressData.current = {
                 index: i + 1,
@@ -812,9 +851,17 @@ export async function batchImportCodexTokensStream(tokens, onProgress = null, sk
                 email,
                 accountId,
                 accessTokenOnly: !refreshToken,
-                path: relativePath
+                path: relativePath,
+                overwritten: !!overwritePath
             };
             results.success++;
+
+            await notifyCodexCredentialsChanged({
+                relativePath,
+                email,
+                accountId,
+                overwritten: !!overwritePath
+            });
 
         } catch (error) {
             logger.error(`${CODEX_OAUTH_CONFIG.logPrefix} Token ${i + 1} import failed:`, error.message);

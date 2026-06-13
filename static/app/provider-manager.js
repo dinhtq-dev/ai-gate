@@ -1062,6 +1062,10 @@ function showCodexBatchImportModal(providerType) {
                         data-i18n-placeholder="oauth.codex.tokensPlaceholder"
                     ></textarea>
                 </div>
+                <label class="codex-overwrite-option" style="display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 14px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="codexBatchOverwriteExisting" style="margin-top: 3px;" />
+                    <span data-i18n="oauth.codex.overwriteExisting">${t('oauth.codex.overwriteExisting')}</span>
+                </label>
                 <div class="form-group" style="margin-top: 12px; margin-bottom: 16px;">
                     <details style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
                         <summary style="padding: 12px; cursor: pointer; font-weight: 600; color: #374151; user-select: none;">
@@ -1204,7 +1208,10 @@ function showCodexBatchImportModal(providerType) {
                 headers: window.apiClient ? window.apiClient.getAuthHeaders() : {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ tokens })
+                body: JSON.stringify({
+                    tokens,
+                    overwriteExisting: !!modal.querySelector('#codexBatchOverwriteExisting')?.checked
+                })
             });
             
             if (!response.ok) {
@@ -1252,7 +1259,10 @@ function showCodexBatchImportModal(providerType) {
                                     const resultItem = document.createElement('div');
                                     resultItem.style.cssText = 'padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.1);';
                                     if (current.success) {
-                                        resultItem.innerHTML = `Token ${current.index}: <span style="color: #166534;">✓ ${current.path}</span>`;
+                                        const overwriteNote = current.overwritten
+                                            ? ` <span style="color: #92400e;">(${t('oauth.codex.overwritten')})</span>`
+                                            : '';
+                                        resultItem.innerHTML = `Token ${current.index}: <span style="color: #166534;">✓ ${current.path}</span>${overwriteNote}`;
                                     } else if (current.error === 'duplicate') {
                                         resultItem.innerHTML = `Token ${current.index}: <span style="color: #d97706;">⚠ ${t('oauth.kiro.duplicateToken')}</span>
                                             ${current.existingPath ? `<span style="color: #666; font-size: 11px;">(${current.existingPath})</span>` : ''}`;
@@ -1846,6 +1856,10 @@ function showCodexExternalImportModal(providerType, source) {
                         placeholder="${meta.placeholder.replace(/"/g, '&quot;')}"
                     ></textarea>
                 </div>
+                <label class="codex-overwrite-option" style="display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 14px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="codexExternalOverwriteExisting" style="margin-top: 3px;" checked />
+                    <span data-i18n="oauth.codex.overwriteExisting">${t('oauth.codex.overwriteExisting')}</span>
+                </label>
                 <div class="form-group" style="margin-top: 12px; margin-bottom: 16px;">
                     <details style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
                         <summary style="padding: 12px; cursor: pointer; font-weight: 600; color: #374151; user-select: none;">
@@ -1953,9 +1967,10 @@ function showCodexExternalImportModal(providerType, source) {
             const requestUrl = isSessionImport
                 ? '/api/codex/batch-import-tokens'
                 : '/api/codex/import-external-credentials';
+            const overwriteExisting = !!modal.querySelector('#codexExternalOverwriteExisting')?.checked;
             const requestBody = isSessionImport
-                ? { tokens: normalizeCodexImportTokens(payload) }
-                : { source, payload };
+                ? { tokens: normalizeCodexImportTokens(payload), overwriteExisting }
+                : { source, payload, overwriteExisting };
 
             const response = await fetch(requestUrl, {
                 method: 'POST',
@@ -2010,10 +2025,17 @@ function showCodexExternalImportModal(providerType, source) {
                                 resultItem.style.cssText = 'padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.1);';
                                 if (current.success) {
                                     const mode = current.accessTokenOnly ? ` <span style="color: #92400e;">(${t('oauth.codex.accessTokenOnly')})</span>` : '';
-                                    resultItem.innerHTML = `${escapeHtml(current.email || 'Codex')}: <span style="color: #166534;">✓ ${escapeHtml(current.path || '')}</span>${mode}`;
+                                    const overwriteNote = current.overwritten
+                                        ? ` <span style="color: #92400e;">(${t('oauth.codex.overwritten')})</span>`
+                                        : '';
+                                    resultItem.innerHTML = `${escapeHtml(current.email || 'Codex')}: <span style="color: #166534;">✓ ${escapeHtml(current.path || '')}</span>${mode}${overwriteNote}`;
                                 } else if (current.error === 'duplicate') {
-                                    resultItem.innerHTML = `${escapeHtml(current.email || `#${current.index}`)}: <span style="color: #d97706;">⚠ ${escapeHtml(t('oauth.kiro.duplicateToken'))}</span>
-                                        ${current.existingPath ? `<span style="color: #666; font-size: 11px;">(${escapeHtml(current.existingPath)})</span>` : ''}`;
+                                    const dupHint = current.accessTokenOnly
+                                        ? t('oauth.codex.duplicateAccount')
+                                        : t('oauth.kiro.duplicateToken');
+                                    resultItem.innerHTML = `${escapeHtml(current.email || `#${current.index}`)}: <span style="color: #d97706;">⚠ ${escapeHtml(dupHint)}</span>
+                                        ${current.existingPath ? `<span style="color: #666; font-size: 11px;">(${escapeHtml(current.existingPath)})</span>` : ''}
+                                        <span style="color: #666; font-size: 11px;"> — ${escapeHtml(t('oauth.codex.overwriteHint'))}</span>`;
                                 } else {
                                     resultItem.innerHTML = `${escapeHtml(current.email || `#${current.index}`)}: <span style="color: #991b1b;">✗ ${escapeHtml(current.error || '')}</span>`;
                                 }

@@ -781,6 +781,20 @@ export function invalidateServiceAdapter(provider, uuid = null) {
     return false;
 }
 
+export function invalidateProviderServiceAdapters(provider) {
+    let count = 0;
+    for (const key of Object.keys(serviceInstances)) {
+        if (key === provider || key.startsWith(provider)) {
+            delete serviceInstances[key];
+            count++;
+        }
+    }
+    if (count > 0) {
+        logger.info(`[Adapter] Invalidated ${count} cached adapter(s) for provider: ${provider}`);
+    }
+    return count;
+}
+
 /**
  * 检查提供商是否已注册（支持前缀匹配）
  * @param {string} provider - 提供商名称

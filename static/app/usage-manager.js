@@ -1,6 +1,6 @@
 // 用量管理模块
 
-import { showToast, bindOnce, escapeHtml, resolveProviderConfig, getProviderIconClass, getProviderThemeColor, getAccountInitial } from './utils.js';
+import { showToast, bindOnce, escapeHtml, resolveProviderConfig, getProviderIconMarkup, getProviderThemeColor, getAccountInitial } from './utils.js';
 import { getAuthHeaders } from './auth.js';
 import { t, getCurrentLanguage } from './i18n.js';
 
@@ -94,7 +94,7 @@ async function loadSupportedProviders() {
             tag.className = 'provider-tag';
             const theme = getProviderThemeColor(resolveProviderConfig(providerId, getProviderConfigMap()));
             tag.style.setProperty('--provider-theme', theme);
-            tag.innerHTML = `<i class="${getProviderIconClass(providerId, getProviderConfigMap())}" aria-hidden="true"></i> ${getProviderDisplayName(providerId)}`;
+            tag.innerHTML = `${getProviderIconMarkup(providerId, getProviderConfigMap())} ${getProviderDisplayName(providerId)}`;
             tag.title = t('usage.doubleClickToRefresh');
             tag.addEventListener('dblclick', () => refreshProviderUsage(providerId));
             listEl.appendChild(tag);
@@ -372,7 +372,7 @@ function createInstanceUsageCard(instance, providerType) {
     const planClass = summary.planClass || 'plan-default';
     const providerConfig = resolveProviderConfig(providerType, getProviderConfigMap());
     const providerTheme = getProviderThemeColor(providerConfig);
-    const providerIcon = getProviderIconClass(providerConfig);
+    const providerIcon = getProviderIconMarkup(providerConfig);
     const providerName = getProviderDisplayName(providerType);
     const accountInitial = getAccountInitial(displayName);
 
@@ -402,7 +402,7 @@ function createInstanceUsageCard(instance, providerType) {
         <div class="usage-card-expanded-content">
             <div class="usage-instance-header">
                 <div class="instance-header-top">
-                    <div class="instance-provider-type"><i class="${providerIcon}"></i><span>${escapeHtml(providerName)}</span></div>
+                    <div class="instance-provider-type">${providerIcon}<span>${escapeHtml(providerName)}</span></div>
                     <div class="instance-status-badges">
                         ${instance.configFilePath ? `<button class="btn-download-config" title="${t('usage.card.downloadConfig')}"><i class="fas fa-download"></i></button>` : ''}
                         <button class="btn-refresh-usage" title="${t('usage.card.refresh')}"><i class="fas fa-sync-alt"></i></button>
@@ -509,7 +509,7 @@ function getProviderDisplayName(type) {
 }
 
 function getProviderIcon(type) {
-    return getProviderIconClass(resolveProviderConfig(type, getProviderConfigMap()));
+    return getProviderIconMarkup(type, getProviderConfigMap());
 }
 
 async function downloadConfigFile(path) {

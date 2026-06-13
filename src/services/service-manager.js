@@ -1,4 +1,4 @@
-import { getServiceAdapter, serviceInstances } from '../providers/adapter.js';
+import { getServiceAdapter, serviceInstances, invalidateServiceAdapter, invalidateProviderServiceAdapters } from '../providers/adapter.js';
 import logger from '../utils/logger.js';
 import { ProviderPoolManager } from '../providers/provider-pool-manager.js';
 import deepmerge from 'deepmerge';
@@ -15,6 +15,7 @@ import {
 } from '../utils/provider-utils.js';
 import { withFileLock, atomicWriteFile } from '../utils/file-lock.js';
 import { MODEL_PROVIDER } from '../utils/constants.js';
+import { CONFIG } from '../core/config-manager.js';
 
 // 存储 ProviderPoolManager 实例
 let providerPoolManager = null;
@@ -118,6 +119,56 @@ export async function autoLinkProviderConfigs(config, options = {}) {
         providerPoolManager.initializeProviderStatus();
     }
     return config.providerPools;
+}
+
+/**
+ * Point existing provider nodes at the latest creds file for the same account.
+ */
+export async function syncProviderCredPathByAccount(providerType, credPathKey, relativePath, { email, accountId } = {}) {
+    const pools = CONFIG?.providerPools?.[providerType];
+    if (!Array.isArray(pools) || pools.length === 0 || !relativePath) {
+        return 0;
+    }
+
+    const normalizedTarget = formatSystemPath(relativePath);
+    let updated = 0;
+
+    for (const provider of pools) {
+        const currentPath = provider[credPathKey];
+        if (!currentPath || currentPath === normalizedTarget) {
+            continue;
+        }
+
+        try {
+            const absolutePath = path.isAbsolute(currentPath)
+                ? currentPath
+                : path.join(process.cwd(), currentPath);
+            const creds = JSON.parse(await pfs.readFile(absolutePath, 'utf8'));
+            const sameEmail = email && creds.email && String(creds.email).toLowerCase() === String(email).toLowerCase();
+            const sameAccount = accountId && creds.account_id && creds.account_id === accountId;
+
+            if (sameEmail || sameAccount) {
+                provider[credPathKey] = normalizedTarget;
+                invalidateServiceAdapter(providerType, provider.uuid);
+                updated++;
+                logger.info(`[Auto-Link] Updated ${providerType} node ${provider.uuid} cred path -> ${normalizedTarget}`);
+            }
+        } catch (error) {
+            logger.warn(`[Auto-Link] Failed to inspect cred path ${currentPath}: ${error.message}`);
+        }
+    }
+
+    if (updated > 0) {
+        const filePath = CONFIG.PROVIDER_POOLS_FILE_PATH || 'configs/provider_pools.json';
+        await withFileLock(filePath, async () => {
+            await atomicWriteFile(filePath, JSON.stringify(CONFIG.providerPools, null, 2), 'utf8');
+        });
+        if (providerPoolManager) {
+            providerPoolManager.providerPools = CONFIG.providerPools;
+        }
+    }
+
+    return updated;
 }
 
 /**

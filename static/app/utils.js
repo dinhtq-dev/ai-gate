@@ -1,6 +1,7 @@
 // 工具函数
 import { t, getCurrentLanguage } from './i18n.js';
 import { apiClient } from './auth.js';
+import { renderProviderBrandSvg } from './provider-brand-icons.js';
 
 /**
  * 获取所有支持的提供商配置列表
@@ -17,12 +18,14 @@ function getBaseProviderConfigs() {
             id: 'forward-api', 
             name: 'NewAPI', 
             icon: 'fa-share-square',
+            brand: 'newapi',
             theme: '#6366f1'
         },
         { 
             id: 'gemini-cli-oauth', 
             name: t('dashboard.routing.nodeName.gemini'), 
             icon: 'fa-robot',
+            brand: 'googlegemini',
             theme: '#4285f4',
             defaultPath: 'configs/gemini/'
         },
@@ -30,6 +33,7 @@ function getBaseProviderConfigs() {
             id: 'gemini-antigravity', 
             name: t('dashboard.routing.nodeName.antigravity'), 
             icon: 'fa-rocket',
+            brand: 'googlegemini',
             theme: '#8b5cf6',
             defaultPath: 'configs/antigravity/'
         },
@@ -37,6 +41,7 @@ function getBaseProviderConfigs() {
             id: 'claude-kiro-oauth', 
             name: t('dashboard.routing.nodeName.kiro'), 
             icon: 'fa-key',
+            brand: 'anthropic',
             theme: '#d97706',
             defaultPath: 'configs/kiro/'
         },
@@ -44,6 +49,7 @@ function getBaseProviderConfigs() {
             id: 'openai-codex-oauth', 
             name: t('dashboard.routing.nodeName.codex'), 
             icon: 'fa-code',
+            brand: 'openai',
             theme: '#10a37f',
             defaultPath: 'configs/codex/'
         },
@@ -51,6 +57,7 @@ function getBaseProviderConfigs() {
             id: 'grok-cli-oauth',
             name: t('dashboard.routing.nodeName.grokCli'),
             icon: 'fa-terminal',
+            brand: 'grok',
             theme: '#374151',
             defaultPath: 'configs/grok-cli/'
         },
@@ -58,6 +65,7 @@ function getBaseProviderConfigs() {
             id: 'openai-qwen-oauth', 
             name: t('dashboard.routing.nodeName.qwen'), 
             icon: 'fa-cloud',
+            brand: 'alibabacloud',
             theme: '#5946e1',
             defaultPath: 'configs/qwen/'
         },
@@ -72,24 +80,28 @@ function getBaseProviderConfigs() {
             id: 'grok-web', 
             name: t('dashboard.routing.nodeName.grok'), 
             icon: 'fa-user-secret',
+            brand: 'grok',
             theme: '#111827'
         },
         { 
             id: 'openai-custom', 
             name: t('dashboard.routing.nodeName.openai'), 
             icon: 'fa-microchip',
+            brand: 'openai',
             theme: '#059669'
         },
         { 
             id: 'claude-custom', 
             name: t('dashboard.routing.nodeName.claude'), 
             icon: 'fa-brain',
+            brand: 'anthropic',
             theme: '#b45309'
         },
         { 
             id: 'openaiResponses-custom', 
             name: 'OpenAI Responses', 
             icon: 'fa-reply-all',
+            brand: 'openai',
             theme: '#047857'
         },
         { 
@@ -202,12 +214,21 @@ function getAccountInitial(label) {
     return clean[0].toUpperCase();
 }
 
+function getProviderIconMarkup(configOrType, configMap = {}) {
+    const config = typeof configOrType === 'string'
+        ? resolveProviderConfig(configOrType, configMap)
+        : configOrType;
+    if (config?.brand) {
+        return renderProviderBrandSvg(config.brand);
+    }
+    return `<i class="${getProviderIconClass(config)}" aria-hidden="true"></i>`;
+}
+
 function buildProviderIconChip(providerType, configMap = {}, size = 'md') {
     const config = resolveProviderConfig(providerType, configMap);
-    const iconClass = getProviderIconClass(config);
     const theme = getProviderThemeColor(config);
     const sizeClass = size === 'sm' ? 'provider-icon-chip--sm' : '';
-    return `<span class="provider-icon-chip ${sizeClass}" style="--provider-theme: ${theme}" title="${escapeHtml(config.name || providerType)}"><i class="${iconClass}" aria-hidden="true"></i></span>`;
+    return `<span class="provider-icon-chip ${sizeClass}" style="--provider-theme: ${theme}" title="${escapeHtml(config.name || providerType)}">${getProviderIconMarkup(config)}</span>`;
 }
 
 /**
@@ -728,6 +749,7 @@ export {
     getBaseProviderConfigs,
     resolveProviderConfig,
     getProviderIconClass,
+    getProviderIconMarkup,
     getProviderThemeColor,
     getAccountInitial,
     buildProviderIconChip,

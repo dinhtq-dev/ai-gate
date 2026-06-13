@@ -378,7 +378,7 @@ export async function handleBatchImportGeminiTokens(req, res) {
 export async function handleBatchImportCodexTokens(req, res) {
     try {
         const body = await getRequestBody(req);
-        let { tokens, payload, skipDuplicateCheck } = body;
+        let { tokens, payload, skipDuplicateCheck, overwriteExisting } = body;
 
         if ((!tokens || !Array.isArray(tokens) || tokens.length === 0) && payload !== undefined && payload !== null) {
             tokens = Array.isArray(payload) ? payload : [payload];
@@ -393,7 +393,7 @@ export async function handleBatchImportCodexTokens(req, res) {
             return true;
         }
 
-        logger.info(`[Codex Batch Import] Starting batch import with ${tokens.length} tokens...`);
+        logger.info(`[Codex Batch Import] Starting batch import with ${tokens.length} tokens (overwriteExisting=${!!overwriteExisting})...`);
 
         // 设置 SSE 响应头
         res.writeHead(200, {
@@ -418,7 +418,10 @@ export async function handleBatchImportCodexTokens(req, res) {
             (progress) => {
                 sendSSE('progress', progress);
             },
-            !!skipDuplicateCheck // 默认为 false (执行去重)
+            {
+                skipDuplicateCheck: !!skipDuplicateCheck,
+                overwriteExisting: !!overwriteExisting
+            }
         );
 
         logger.info(`[Codex Batch Import] Completed: ${result.success} success, ${result.failed} failed`);
@@ -528,7 +531,7 @@ export async function handleBatchImportGrokCliTokens(req, res) {
 export async function handleImportCodexExternalCredentials(req, res) {
     try {
         const body = await getRequestBody(req, { maxBytes: CODEX_EXTERNAL_IMPORT_BODY_LIMIT_BYTES });
-        const { source, payload, skipDuplicateCheck } = body;
+        const { source, payload, skipDuplicateCheck, overwriteExisting } = body;
 
         if (payload === undefined || payload === null) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -590,7 +593,10 @@ export async function handleImportCodexExternalCredentials(req, res) {
                     source: resolvedSource
                 });
             },
-            !!skipDuplicateCheck
+            {
+                skipDuplicateCheck: !!skipDuplicateCheck,
+                overwriteExisting: !!overwriteExisting
+            }
         );
 
         logger.info(`[Codex External Import] Completed ${resolvedSource}: ${result.success} success, ${result.failed} failed`);
